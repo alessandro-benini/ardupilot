@@ -9,6 +9,7 @@
 // stabilize_init - initialise stabilize controller
 bool Copter::vision_land_init(bool ignore_checks)
 {
+	hal.uartE->begin(115200);
     return true;
 }
 
@@ -16,4 +17,5 @@ bool Copter::vision_land_init(bool ignore_checks)
 // should be called at 100hz or more
 void Copter::vision_land_run()
 {
+	hal.uartE->printf("Hello on UART E - at %.3f seconds\n",AP_HAL::millis()*0.001f);
 }
