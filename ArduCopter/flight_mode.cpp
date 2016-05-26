@@ -28,8 +28,8 @@ bool Copter::set_mode(control_mode_t mode, mode_reason_t reason)
 
     switch(mode) {
 
-    	case AUTO_LAND:
-    			success = auto_land_init(ignore_checks);
+    	case VISION_LAND:
+    			success = vision_land_init(ignore_checks);
     		break;
 
         case ACRO:
@@ -154,8 +154,8 @@ void Copter::update_flight_mode()
 
     switch (control_mode) {
 
-		case AUTO_LAND:
-			auto_land_run();
+		case VISION_LAND:
+			vision_land_run();
 		break;
 
         case ACRO:
@@ -358,8 +358,8 @@ void Copter::print_flight_mode(AP_HAL::BetterStream *port, uint8_t mode)
 {
     switch (mode) {
 
-	case AUTO_LAND:
-		port->print("AUTO_LAND");
+	case VISION_LAND:
+		port->print("VISION_LAND");
 		break;
 
     case STABILIZE:

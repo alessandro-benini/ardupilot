@@ -581,8 +581,8 @@ private:
     static const struct LogStructure log_structure[];
 
     // Autonomous Landing functions
-    bool auto_land_init(bool ignore_checks);
-    void auto_land_run();
+    bool vision_land_init(bool ignore_checks);
+    void vision_land_run();
 
     void compass_accumulate(void);
     void compass_cal_update(void);

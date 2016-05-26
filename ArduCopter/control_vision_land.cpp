@@ -7,13 +7,13 @@
  */
 
 // stabilize_init - initialise stabilize controller
-bool Copter::auto_land_init(bool ignore_checks)
+bool Copter::vision_land_init(bool ignore_checks)
 {
     return true;
 }
 
 // stabilize_run - runs the main stabilize controller
 // should be called at 100hz or more
-void Copter::auto_land_run()
+void Copter::vision_land_run()
 {
 }
