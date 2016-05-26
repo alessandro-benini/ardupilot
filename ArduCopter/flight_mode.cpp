@@ -27,6 +27,11 @@ bool Copter::set_mode(control_mode_t mode, mode_reason_t reason)
     }
 
     switch(mode) {
+
+    	case AUTO_LAND:
+    			success = auto_land_init(ignore_checks);
+    		break;
+
         case ACRO:
             #if FRAME_CONFIG == HELI_FRAME
                 success = heli_acro_init(ignore_checks);
@@ -148,6 +153,11 @@ void Copter::update_flight_mode()
     ahrs.getEkfControlLimits(ekfGndSpdLimit, ekfNavVelGainScaler);
 
     switch (control_mode) {
+
+		case AUTO_LAND:
+			auto_land_run();
+		break;
+
         case ACRO:
             #if FRAME_CONFIG == HELI_FRAME
                 heli_acro_run();
@@ -347,6 +357,11 @@ void Copter::notify_flight_mode(control_mode_t mode) {
 void Copter::print_flight_mode(AP_HAL::BetterStream *port, uint8_t mode)
 {
     switch (mode) {
+
+	case AUTO_LAND:
+		port->print("AUTO_LAND");
+		break;
+
     case STABILIZE:
         port->print("STABILIZE");
         break;

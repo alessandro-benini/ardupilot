@@ -321,7 +321,7 @@
  # define FLIGHT_MODE_1                  STABILIZE
 #endif
 #ifndef FLIGHT_MODE_2
- # define FLIGHT_MODE_2                  STABILIZE
+ # define FLIGHT_MODE_2                  AUTO_LAND
 #endif
 #ifndef FLIGHT_MODE_3
  # define FLIGHT_MODE_3                  STABILIZE

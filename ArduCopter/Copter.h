@@ -580,6 +580,10 @@ private:
     static const AP_Param::Info var_info[];
     static const struct LogStructure log_structure[];
 
+    // Autonomous Landing functions
+    bool auto_land_init(bool ignore_checks);
+    void auto_land_run();
+
     void compass_accumulate(void);
     void compass_cal_update(void);
     void barometer_accumulate(void);
