@@ -155,10 +155,28 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
 };
 
+static void setup_uart(AP_HAL::UARTDriver *uart, const char *name)
+{
+    if (uart == NULL) {
+        // that UART doesn't exist on this platform
+        return;
+    }
+    uart->begin(115200);
+}
+
+static void test_uart(AP_HAL::UARTDriver *uart, const char *name)
+{
+    if (uart == NULL) {
+        // that UART doesn't exist on this platform
+        return;
+    }
+    uart->printf("Hello on UART  - %s at %.3f seconds\n",name, AP_HAL::millis()*0.001f);
+}
 
 void Copter::setup() 
 {
     cliSerial = hal.console;
+    setup_uart(hal.uartE, "uartE"); // 2nd GPS
 
     // Load the default values of variables listed in var_info[]s
     AP_Param::setup_sketch_defaults();
@@ -329,6 +347,7 @@ void Copter::update_mount()
     // update camera mount's position
     camera_mount.update();
 #endif
+    test_uart(hal.uartE, "uartE");
 }
 
 // update camera trigger
