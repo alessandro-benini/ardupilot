@@ -25,12 +25,13 @@ void Copter::vision_land_read_packet()
 	while(hal.uartE->available() > 0 && c != '\n' && i < sizeof(buf)-1)
 	{
 	      c = hal.uartE->read();
+	      cliSerial->printf("%c",c);
 	      buf[i++] = c;
 	}
 
-	buf[sizeof(buf)-1] = '\0';
+	buf[249] = '\0';
 
-	cliSerial->printf("Received Message: %s\n",buf);
+	//cliSerial->printf("Received Message: %s\n",buf);
 
 }
 
