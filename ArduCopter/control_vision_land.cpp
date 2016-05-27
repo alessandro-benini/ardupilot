@@ -22,17 +22,16 @@ void Copter::vision_land_read_packet()
 	char buf[250];
 	unsigned int i = 0;
 
-	vision_land_print_uart("Message @ 25 Hz\n");
+	while(hal.uartE->available() > 0 && c != '\n' && i < sizeof(buf)-1)
+	{
+	      c = hal.uartE->read();
+	      buf[i++] = c;
+	}
 
-//	// hal.uartE->available() > 0
-//	while(c != '\n' && i < sizeof(buf))
-//	{
-//	      c = hal.uartE->read();
-//	      buf[i++] = c;
-//	}
-//
-//	vision_land_print_uart("\nReceived message:");
-//	vision_land_print_uart(buf);
+	buf[sizeof(buf)-1] = '\0';
+
+	cliSerial->printf("Received Message: %s\n",buf);
+
 }
 
 bool Copter::vision_land_init(bool ignore_checks)
