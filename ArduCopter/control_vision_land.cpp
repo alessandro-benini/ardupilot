@@ -6,16 +6,42 @@
  * control_stabilize.pde - init and run calls for stabilize flight mode
  */
 
-// stabilize_init - initialise stabilize controller
+void Copter::vision_land_setup_uart(const char *name)
+{
+    hal.uartE->begin(115200,256,256);
+}
+
+void Copter::vision_land_print_uart(const char *str)
+{
+    hal.uartE->printf("%s",str);
+}
+
+void Copter::vision_land_read_packet()
+{
+	char c = 0;
+	char buf[250];
+	unsigned int i = 0;
+
+	vision_land_print_uart("Message @ 25 Hz\n");
+
+//	// hal.uartE->available() > 0
+//	while(c != '\n' && i < sizeof(buf))
+//	{
+//	      c = hal.uartE->read();
+//	      buf[i++] = c;
+//	}
+//
+//	vision_land_print_uart("\nReceived message:");
+//	vision_land_print_uart(buf);
+}
+
 bool Copter::vision_land_init(bool ignore_checks)
 {
-	hal.uartE->begin(115200);
+	vision_land_setup_uart("VISION_DATA");
     return true;
 }
 
-// stabilize_run - runs the main stabilize controller
-// should be called at 100hz or more
 void Copter::vision_land_run()
 {
-	hal.uartE->printf("Hello on UART E - at %.3f seconds\n",AP_HAL::millis()*0.001f);
+
 }

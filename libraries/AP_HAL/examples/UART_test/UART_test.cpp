@@ -19,9 +19,8 @@ static void setup_uart(AP_HAL::UARTDriver *uart, const char *name)
         // that UART doesn't exist on this platform
         return;
     }
-    uart->begin(57600);
+    uart->begin(57600,256,256);
 }
-
 
 void setup(void) 
 {

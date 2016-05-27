@@ -581,6 +581,9 @@ private:
     static const struct LogStructure log_structure[];
 
     // Autonomous Landing functions
+    void vision_land_setup_uart(const char *name);
+    void vision_land_print_uart(const char *str);
+    void vision_land_read_packet();
     bool vision_land_init(bool ignore_checks);
     void vision_land_run();
 
