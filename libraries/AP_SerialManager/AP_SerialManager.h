@@ -64,6 +64,9 @@
 #define AP_SERIALMANAGER_SToRM32_BUFSIZE_RX     128
 #define AP_SERIALMANAGER_SToRM32_BUFSIZE_TX     128
 
+#define AP_SERIALMANAGER_JETSON_TK1             115200
+#define AP_SERIALMANAGER_JETSON_TK1_BUFSIZE_RX  200
+#define AP_SERIALMANAGER_JETSON_TK1_BUFSIZE_TX  200
 
 class AP_SerialManager {
 
@@ -81,6 +84,7 @@ public:
         SerialProtocol_AlexMos = 7,
         SerialProtocol_SToRM32 = 8,
         SerialProtocol_Lidar = 9,
+        SerialProtocol_Jetson_TK1 = 10, // Added for UART connection with Jetson GPIO. The baudrate is set to 115200, but can be modified.
     };
 
     // Constructor

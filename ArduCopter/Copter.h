@@ -90,6 +90,8 @@
 #include <AC_InputManager/AC_InputManager.h>        // Pilot input handling library
 #include <AC_InputManager/AC_InputManager_Heli.h>   // Heli specific pilot input handling library
 
+#include <AP_VisionPose/AP_VisionPose.h>
+
 // Configuration
 #include "defines.h"
 #include "config.h"

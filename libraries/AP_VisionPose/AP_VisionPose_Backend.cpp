@@ -12,21 +12,7 @@
 
 extern const AP_HAL::HAL& hal;
 
-AP_VisionPose_Backend::AP_VisionPose_Backend(VisionPose &vision_pose) :
-    _vision_pose(vision_pose)
-{}
-
-void AP_VisionPose_Backend::set_last_update_usec(uint32_t last_update, uint8_t instance)
-{
-	VisionPose::vision_pose_state &state = _vision_pose._state[instance];
-    state.last_update_usec = last_update;
-}
-
-/*
-  register a new backend with frontend, returning instance which
-  should be used in publish_field()
- */
-uint8_t AP_VisionPose_Backend::register_vision_pose(void) const
-{
-    return _vision_pose.register_vision_pose();
-}
+AP_VisionPose_Backend::AP_VisionPose_Backend(AP_VisionPose &_vision_pose, AP_VisionPose::VisionPose_State &_state, AP_HAL::UARTDriver *_port) :
+	VisionPose(_vision_pose),
+	port(_port),
+    state(_state) {}

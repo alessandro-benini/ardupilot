@@ -366,6 +366,8 @@ private:
         // the time we got our last fix in system milliseconds
         uint32_t last_message_time_ms;
     };
+
+
     GPS_timing timing[GPS_MAX_INSTANCES];
     GPS_State state[GPS_MAX_INSTANCES];
     AP_GPS_Backend *drivers[GPS_MAX_INSTANCES];

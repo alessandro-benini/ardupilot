@@ -1,5 +1,5 @@
 /*
- * VisionPose_Backend.h
+ * AP_VisionPose_Backend.h
  *
  *  Created on: May 31, 2016
  *      Author: Alessandro Benini
@@ -9,32 +9,24 @@
 
 #include "AP_VisionPose.h"
 
-class VisionPose;
 class AP_VisionPose_Backend
 {
 public:
-	AP_VisionPose_Backend(VisionPose &vision_pose);
+	AP_VisionPose_Backend(AP_VisionPose &_vision_pose, AP_VisionPose::VisionPose_State &_state, AP_HAL::UARTDriver *_port);
 
-    // we declare a virtual destructor so that drivers can
+    // we declare a virtual destructor so that GPS drivers can
     // override with a custom destructor if need be.
     virtual ~AP_VisionPose_Backend(void) {}
 
-    // initialize the vision pose sensor
-    virtual bool init(void) = 0;
-
-    // read sensor data
-    virtual void read(void) = 0;
-
-    // accumulate a reading from the sensor. Optional in backends
-    virtual void accumulate(void) {};
+    // The read() method is the only one needed in each driver. It
+    // should return true when the backend has successfully received a
+    // valid packet from the GPS.
+    virtual bool read() = 0;
 
 protected:
+    AP_HAL::UARTDriver *port;              		///< UART we are attached to
+    AP_VisionPose &vision_pose;                 ///< access to frontend (for parameters)
+    AP_VisionPose::VisionPose_State &state;     ///< public state for this instance
 
-    void set_last_update_usec(uint32_t last_update, uint8_t instance);
-
-    // register a new vision_pose instance with the frontend
-    uint8_t register_vision_pose(void) const;
-
-    // access to frontend
-    VisionPose &_vision_pose;
 };
+
