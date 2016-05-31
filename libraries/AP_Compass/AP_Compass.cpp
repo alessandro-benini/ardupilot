@@ -392,9 +392,7 @@ Compass::Compass(void) :
 }
 
 // Default init method
-//
-bool
-Compass::init()
+bool Compass::init()
 {
     if (_compass_count == 0) {
         // detect available backends. Only called once
