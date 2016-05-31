@@ -7,10 +7,9 @@
 
 #pragma once
 
-#include <inttypes.h>
-
 #include <AP_HAL/AP_HAL.h>
-#include "AP_VisionPose_Backend.h"
+#include <inttypes.h>
+#include <AP_SerialManager/AP_SerialManager.h>
 
 // For the moment the maximum number of vision pose sensors is limited to 1.
 #define VISION_POSE_MAX_INSTANCES 1
@@ -25,7 +24,7 @@ public:
 
     // constructor
 	AP_VisionPose() {
-		// AP_Param::setup_object_defaults(this, var_info);
+		AP_Param::setup_object_defaults(this, var_info);
     }
 
     /// Startup initialisation.
@@ -62,6 +61,8 @@ public:
         uint32_t    last_update_usec;
 
 	};
+
+	static const struct AP_Param::GroupInfo var_info[];
 
     // dataflash for logging, if available
     DataFlash_Class *_DataFlash;

@@ -12,10 +12,10 @@ extern const AP_HAL::HAL &hal;
 
 ////////////////
 ////////////////
-// Note: AP_GPS::update(void) is where it is selected the primry GPS (based on the estimation quality)
+// Note: AP_GPS::update(void) is where it is selected the primary GPS (based on the estimation quality)
 
 /// Startup initialisation.
-void AP_GPS::init(DataFlash_Class *dataflash, const AP_SerialManager& serial_manager)
+void AP_VisionPose::init(DataFlash_Class *dataflash, const AP_SerialManager& serial_manager)
 {
     _DataFlash = dataflash;
     primary_instance = 0;

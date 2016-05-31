@@ -13,6 +13,6 @@
 extern const AP_HAL::HAL& hal;
 
 AP_VisionPose_Backend::AP_VisionPose_Backend(AP_VisionPose &_vision_pose, AP_VisionPose::VisionPose_State &_state, AP_HAL::UARTDriver *_port) :
-	VisionPose(_vision_pose),
-	port(_port),
-    state(_state) {}
+    	    port(_port),
+    	    vision_pose(_vision_pose),
+    	    state(_state) {}
