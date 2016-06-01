@@ -85,6 +85,5 @@ private:
     // which ports are locked
     uint8_t locked_ports:1;
 
-
 };
 
