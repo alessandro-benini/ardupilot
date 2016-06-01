@@ -15,16 +15,12 @@ AP_VisionPose_Jetson::AP_VisionPose_Jetson(AP_VisionPose &_vision_pose, AP_Visio
 
 bool AP_VisionPose_Jetson::read(void)
 {
-    uint8_t data;
     int16_t numc;
     bool parsed = false;
 
     numc = port->available();
-
-    for (int16_t i = 0; i < numc; i++) {        // Process bytes received
-
-        // read the next byte
-        data = port->read();
-
+    while (numc--) {
+        char c = port->read();
+    }
     return parsed;
 }

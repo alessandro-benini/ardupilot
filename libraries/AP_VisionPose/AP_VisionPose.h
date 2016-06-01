@@ -23,9 +23,7 @@ class AP_VisionPose
 public:
 
     // constructor
-	AP_VisionPose() {
-		AP_Param::setup_object_defaults(this, var_info);
-    }
+	AP_VisionPose();
 
     /// Startup initialisation.
     void init(DataFlash_Class *dataflash, const AP_SerialManager& serial_manager);
@@ -34,6 +32,8 @@ public:
     /// This routine must be called periodically (typically at 10Hz or
     /// more) to process incoming data.
     void update(void);
+
+    void mymethod(void);
 
 	struct VisionPose_State {
 

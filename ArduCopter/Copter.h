@@ -171,6 +171,8 @@ private:
     Compass compass;
     AP_InertialSensor ins;
 
+    AP_VisionPose vision_pose;
+
     RangeFinder rangefinder {serial_manager};
     struct {
         bool enabled:1;

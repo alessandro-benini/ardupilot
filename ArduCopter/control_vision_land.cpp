@@ -8,6 +8,7 @@
 
 void Copter::vision_land_setup_uart(const char *name)
 {
+	vision_pose.mymethod();
     hal.uartE->begin(115200,256,256);
 }
 
