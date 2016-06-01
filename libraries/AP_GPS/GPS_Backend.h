@@ -54,6 +54,7 @@ public:
 protected:
     AP_HAL::UARTDriver *port;           ///< UART we are attached to
     AP_GPS &gps;                        ///< access to frontend (for parameters)
+    // AB: state is a reference to the variable declare in AP_GPS.h (GPS_State state[GPS_MAX_INSTANCES])
     AP_GPS::GPS_State &state;           ///< public state for this instance
 
     // common utility functions

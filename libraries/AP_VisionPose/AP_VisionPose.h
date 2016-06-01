@@ -72,9 +72,9 @@ public:
 
 private:
 
-    VisionPose_State state[VISION_POSE_MAX_INSTANCES];
-    AP_VisionPose_Backend *drivers[VISION_POSE_MAX_INSTANCES];
-    AP_HAL::UARTDriver *_port[VISION_POSE_MAX_INSTANCES];
+    VisionPose_State state;
+    AP_VisionPose_Backend *driver;
+    AP_HAL::UARTDriver *_port;
 
     /// primary GPS instance
     uint8_t primary_instance:1;

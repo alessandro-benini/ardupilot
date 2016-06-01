@@ -423,6 +423,8 @@ AP_GPS::update(void)
         if (state[i].status != NO_GPS) {
             num_instances = i+1;
         }
+        // AB: If _auto_switch is enabled and more than one GPS is present, the system
+        // will switch automatically to the GPS with the best accuracy
         if (_auto_switch) {            
             if (i == primary_instance) {
                 continue;

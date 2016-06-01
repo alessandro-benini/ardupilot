@@ -27,11 +27,11 @@ void AP_VisionPose::init(DataFlash_Class *dataflash, const AP_SerialManager& ser
     primary_instance = 0;
 
     // search for serial ports with gps protocol
-    _port[0] = serial_manager.find_serial(AP_SerialManager::SerialProtocol_Jetson_TK1, 0);
+    _port = serial_manager.find_serial(AP_SerialManager::SerialProtocol_Jetson_TK1, 0);
     _last_instance_swap_ms = 0;
 }
 
-void AP_VisionPose::mymethod(void)
+void AP_VisionPose::update(void)
 {
 	_last_instance_swap_ms = 0;
 }
