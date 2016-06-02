@@ -85,7 +85,7 @@
   and the maximum time they are expected to take (in microseconds)
  */
 const AP_Scheduler::Task Copter::scheduler_tasks[] = {
-	SCHED_TASK(vision_land_read_packet, 2,  100),
+	SCHED_TASK(update_vision_pose,    25,    100),
     SCHED_TASK(rc_loop,              100,    130),
     SCHED_TASK(throttle_loop,         50,     75),
     SCHED_TASK(update_GPS,            50,    200),
@@ -361,6 +361,13 @@ void Copter::update_batt_compass(void)
             DataFlash.Log_Write_Compass(compass);
         }
     }
+}
+
+// Function for update the status of the vision_pose
+// It will run at 25Hz.
+void Copter::update_vision_pose(void)
+{
+	vision_pose.update();
 }
 
 // ten_hz_logging_loop
