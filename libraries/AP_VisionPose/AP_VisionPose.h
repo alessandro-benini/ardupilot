@@ -26,7 +26,7 @@ public:
 	AP_VisionPose();
 
     /// Startup initialisation.
-	void init(AP_HAL::UARTDriver *port);
+	void init(AP_HAL::UARTDriver *port, const char *name);
 
     /// Update VisionPose state based on possible bytes received from the module.
     /// This routine must be called periodically (typically at 10Hz or

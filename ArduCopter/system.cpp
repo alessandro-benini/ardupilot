@@ -186,6 +186,9 @@ void Copter::init_ardupilot()
     // Do GPS init
     gps.init(&DataFlash, serial_manager);
 
+    // Do VisionPose init
+    vision_pose.init(hal.uartE,"JETSON");
+
     if(g.compass_enabled)
         init_compass();
 

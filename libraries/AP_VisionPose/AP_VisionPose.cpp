@@ -5,6 +5,8 @@
  *      Author: Alessandro Benini
  */
 
+#include <cstring>
+
 #include <AP_HAL/AP_HAL.h>
 #include "AP_VisionPose.h"
 #include "AP_VisionPose_Backend.h"
@@ -19,19 +21,21 @@ extern const AP_HAL::HAL &hal;
 AP_VisionPose::AP_VisionPose() : _last_instance_swap_ms(0){}
 
 /// Startup initialization.
-void AP_VisionPose::init(AP_HAL::UARTDriver *port)
+void AP_VisionPose::init(AP_HAL::UARTDriver *port, const char *name)
 {
     _port = port;
     _port->begin(115200,256,256);
     _last_instance_swap_ms = 0;
     // _DataFlash = dataflash;
 
-    driver = new AP_VisionPose_Jetson(*this, state, _port);
-
+    if(!strcmp(name, "JETSON"))
+    	driver = new AP_VisionPose_Jetson(*this, state, _port);
+    else
+    	driver = NULL;
 }
 
 void AP_VisionPose::update(void)
 {
-	_last_instance_swap_ms = 0;
+	driver->read();
 }
 
