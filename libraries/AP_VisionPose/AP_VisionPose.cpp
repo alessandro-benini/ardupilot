@@ -28,10 +28,10 @@ void AP_VisionPose::init(AP_HAL::UARTDriver *port, const char *name)
     _last_instance_swap_ms = 0;
     // _DataFlash = dataflash;
 
-    if(!strcmp(name, "JETSON"))
+    //if(!strcmp(name, "JETSON"))
     	driver = new AP_VisionPose_Jetson(*this, state, _port);
-    else
-    	driver = NULL;
+    //else
+    //	driver = NULL;
 }
 
 void AP_VisionPose::update(void)

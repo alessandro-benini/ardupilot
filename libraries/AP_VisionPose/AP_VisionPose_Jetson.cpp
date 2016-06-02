@@ -15,20 +15,23 @@ AP_VisionPose_Jetson::AP_VisionPose_Jetson(AP_VisionPose &_vision_pose, AP_Visio
 
 bool AP_VisionPose_Jetson::read(void)
 {
-    int16_t numc;
+
+	char buf[250];
+	unsigned int i = 0;
+
     bool parsed = false;
 
-    char msg[200];
-
     char c = '#';
-    int i = 0;
 
-	do {
-		c = port->read();
-		msg[i] = c;
-	} while (c != '}');
+	while(port->available() > 0 && c != '\n' && i < sizeof(buf)-1)
+	{
+	      c = port->read();
+	      buf[i++] = c;
+	}
 
-	hal.console->print(msg);
+	buf[sizeof(buf)-1] = '\0';
+
+	hal.console->printf("Received Message: %s\n",buf);
 
     return parsed;
 }
