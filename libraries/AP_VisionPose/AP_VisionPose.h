@@ -26,10 +26,9 @@ public:
 	AP_VisionPose();
 
     /// Startup initialisation.
-	void init(DataFlash_Class *dataflash,AP_HAL::UARTDriver *port);
-	// void init(AP_HAL::UARTDriver *port);
+	void init(AP_HAL::UARTDriver *port);
 
-    /// Update GPS state based on possible bytes received from the module.
+    /// Update VisionPose state based on possible bytes received from the module.
     /// This routine must be called periodically (typically at 10Hz or
     /// more) to process incoming data.
     void update(void);
@@ -54,7 +53,7 @@ public:
 		// Raw position vector - NED frame
 		AP_Vector3f position_r;
 
-		// Check if the measure is healty (for example after CRC checck)
+		// Check if the measure is healthy (for example after CRC check)
 		bool healthy;
 
         // When we last got data
@@ -65,9 +64,6 @@ public:
 
 	static const struct AP_Param::GroupInfo var_info[];
 
-    // dataflash for logging, if available
-    DataFlash_Class *_DataFlash;
-
     // configuration parameters
     uint32_t _last_instance_swap_ms;
 
@@ -76,15 +72,6 @@ private:
     VisionPose_State state;
     AP_VisionPose_Backend *driver;
     AP_HAL::UARTDriver *_port;
-
-    /// primary GPS instance
-    uint8_t primary_instance:1;
-
-    /// number of GPS instances present
-    uint8_t num_instances:1;
-
-    // which ports are locked
-    uint8_t locked_ports:1;
 
 };
 
