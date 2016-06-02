@@ -13,5 +13,6 @@ bool Copter::vision_land_init(bool ignore_checks)
 
 void Copter::vision_land_run()
 {
+	// Here it comes the control system for landing the Helicopter.
 
 }
