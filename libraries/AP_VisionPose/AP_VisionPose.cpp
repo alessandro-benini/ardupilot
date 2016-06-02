@@ -21,13 +21,20 @@ AP_VisionPose::AP_VisionPose() :
 }
 
 /// Startup initialization.
-void AP_VisionPose::init(DataFlash_Class *dataflash, const AP_SerialManager& serial_manager)
+void AP_VisionPose::init(DataFlash_Class *dataflash,AP_HAL::UARTDriver *port)
+// void AP_VisionPose::init(AP_HAL::UARTDriver *port)
 {
     _DataFlash = dataflash;
     primary_instance = 0;
 
     // search for serial ports with gps protocol
-    _port = serial_manager.find_serial(AP_SerialManager::SerialProtocol_Jetson_TK1, 0);
+    //_port = serial_manager.find_serial(AP_SerialManager::SerialProtocol_Jetson_TK1, 0);
+    //_port = &hal.uartE;
+
+    _port = port;
+
+    _port->begin(115200);
+
     _last_instance_swap_ms = 0;
 }
 

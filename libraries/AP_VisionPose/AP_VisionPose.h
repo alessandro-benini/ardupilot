@@ -26,7 +26,8 @@ public:
 	AP_VisionPose();
 
     /// Startup initialisation.
-    void init(DataFlash_Class *dataflash, const AP_SerialManager& serial_manager);
+	void init(DataFlash_Class *dataflash,AP_HAL::UARTDriver *port);
+	// void init(AP_HAL::UARTDriver *port);
 
     /// Update GPS state based on possible bytes received from the module.
     /// This routine must be called periodically (typically at 10Hz or
