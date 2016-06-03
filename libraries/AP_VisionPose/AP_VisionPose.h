@@ -35,6 +35,14 @@ public:
 
 	struct VisionPose_State {
 
+    	float x;
+    	float y;
+    	float z;
+
+    	float roll;
+    	float pitch;
+    	float yaw;
+
 		// Filtered attitude vector (Roll, Pitch, Yaw) - NED frame
 		AP_Vector3f attitude_f;
 
