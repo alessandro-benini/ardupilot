@@ -15,23 +15,49 @@ AP_VisionPose_Jetson::AP_VisionPose_Jetson(AP_VisionPose &_vision_pose, AP_Visio
 
 bool AP_VisionPose_Jetson::read(void)
 {
+	    uint8_t d;
+	    char c;
+	    int16_t numc;
+	    bool parsed = false;
 
-	char buf[250];
-	unsigned int i = 0;
+	    numc = port->available();
+	    hal.console->printf("Number of bytes available on serial: %u\n", numc);
 
-    bool parsed = false;
+	    for (int16_t i = 0; i < numc; i++)
+	    {        // Process bytes received
 
-    char c = '#';
+	        // read the next byte
+	        c = (char)port->read();
+	        hal.console->printf("%c",c);
 
-	while(port->available() > 0 && c != '\n' && i < sizeof(buf)-1)
-	{
-	      c = port->read();
-	      buf[i++] = c;
-	}
-
-	buf[sizeof(buf)-1] = '\0';
-
-	hal.console->printf("Received Message: %s\n",buf);
-
-    return parsed;
+	    }
+	    return parsed;
 }
+
+
+
+//	// hal.console->printf("TEST Message AP_VisionPose_Jetson\n");
+//
+//	char buf[250];
+//	unsigned int i = 0;
+//
+//    bool parsed = false;
+//
+//    char c = '0';
+//
+//    // port->available() > 0 &&
+//	while(c != '#' && i < sizeof(buf)-1)
+//	{
+//		  hal.console->printf("%c",c);
+//	      c = port->read();
+//	      buf[i++] = c;
+//	}
+//
+//	// buf[sizeof(buf)-1] = '\0';
+//	buf[249] = '\0';
+//
+//	//hal.console->printf("Received Message: %s\n",buf);
+//
+//    return parsed;
+
+// }

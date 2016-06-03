@@ -33,8 +33,6 @@ public:
     /// more) to process incoming data.
     void update(void);
 
-    void mymethod(void);
-
 	struct VisionPose_State {
 
 		// Filtered attitude vector (Roll, Pitch, Yaw) - NED frame

@@ -24,7 +24,7 @@ AP_VisionPose::AP_VisionPose() : _last_instance_swap_ms(0){}
 void AP_VisionPose::init(AP_HAL::UARTDriver *port, const char *name)
 {
     _port = port;
-    _port->begin(115200,256,256);
+    _port->begin(115200,250,250);
     _last_instance_swap_ms = 0;
     // _DataFlash = dataflash;
 
