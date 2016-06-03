@@ -14,7 +14,7 @@ bool Copter::vision_land_init(bool ignore_checks)
 
 void Copter::vision_land_run()
 {
+	float x = vision_pose.get_x_position();
+	hal.console->printf("Received message\n");
 	// Here it comes the control system for landing the Helicopter.
-	hal.console->printf("Pos X: %f\n",vision_pose.get_x_position());
-
 }
