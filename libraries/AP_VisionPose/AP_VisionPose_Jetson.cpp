@@ -67,7 +67,7 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
     int r;
 
     jsmn_parser p;
-    jsmntok_t t[128]; /* We expect no more than 128 tokens */
+    jsmntok_t t[25];
 
     jsmn_init(&p);
     r = jsmn_parse(&p, JSON_STRING, strlen(JSON_STRING), t, sizeof(t) / sizeof(t[0]));
