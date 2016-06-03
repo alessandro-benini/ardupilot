@@ -65,7 +65,7 @@ static jsmnerr_t jsmn_parse_primitive(jsmn_parser *parser, const char *js,
 found:
 	if (tokens == NULL) {
 		parser->pos--;
-		return 0;
+		return JSMN_NO_ERROR;
 	}
 	token = jsmn_alloc_token(parser, tokens, num_tokens);
 	if (token == NULL) {
@@ -77,7 +77,7 @@ found:
 	token->parent = parser->toksuper;
 #endif
 	parser->pos--;
-	return 0;
+	return JSMN_NO_ERROR;
 }
 
 /**
@@ -98,7 +98,7 @@ static jsmnerr_t jsmn_parse_string(jsmn_parser *parser, const char *js,
 		/* Quote: end of string */
 		if (c == '\"') {
 			if (tokens == NULL) {
-				return 0;
+				return JSMN_NO_ERROR;
 			}
 			token = jsmn_alloc_token(parser, tokens, num_tokens);
 			if (token == NULL) {
@@ -109,7 +109,7 @@ static jsmnerr_t jsmn_parse_string(jsmn_parser *parser, const char *js,
 #ifdef JSMN_PARENT_LINKS
 			token->parent = parser->toksuper;
 #endif
-			return 0;
+			return JSMN_NO_ERROR;
 		}
 
 		/* Backslash: Quoted symbol expected */
@@ -150,9 +150,9 @@ static jsmnerr_t jsmn_parse_string(jsmn_parser *parser, const char *js,
 /**
  * Parse JSON string and fill tokens.
  */
-jsmnerr_t jsmn_parse(jsmn_parser *parser, const char *js, size_t len,
-		jsmntok_t *tokens, unsigned int num_tokens) {
-	jsmnerr_t r;
+int jsmn_parse(jsmn_parser *parser, const char *js, size_t len,jsmntok_t *tokens, unsigned int num_tokens)
+{
+	int r;
 	int i;
 	jsmntok_t *token;
 	int count = 0;

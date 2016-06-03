@@ -51,8 +51,9 @@ bool AP_VisionPose_Jetson::read(void)
 				{
 					msg[j] = '}';
 					msg[j+1] = '\0';
-					hal.console->printf("%s",msg);
-					parsed = true;
+					// hal.console->printf("%s",msg);
+					if(decode_JSON(msg))
+						parsed = true;
 				}
 			}
 		}

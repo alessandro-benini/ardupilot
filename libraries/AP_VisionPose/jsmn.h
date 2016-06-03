@@ -46,6 +46,7 @@ typedef enum {
 } jsmntype_t;
 
 typedef enum {
+	JSMN_NO_ERROR = 0,
 	/* Not enough tokens were provided */
 	JSMN_ERROR_NOMEM = -1,
 	/* Invalid character inside JSON string */
@@ -89,7 +90,7 @@ void jsmn_init(jsmn_parser *parser);
  * Run JSON parser. It parses a JSON data string into and array of tokens, each describing
  * a single JSON object.
  */
-jsmnerr_t jsmn_parse(jsmn_parser *parser, const char *js, size_t len,
+int jsmn_parse(jsmn_parser *parser, const char *js, size_t len,
 		jsmntok_t *tokens, unsigned int num_tokens);
 
 int jsoneq(const char *json, jsmntok_t *tok, const char *s);

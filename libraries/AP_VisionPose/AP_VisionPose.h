@@ -68,6 +68,10 @@ public:
 
 	};
 
+    float get_x_position(void) const {
+        return state.x;
+    }
+
 	static const struct AP_Param::GroupInfo var_info[];
 
     // configuration parameters
