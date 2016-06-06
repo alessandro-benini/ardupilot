@@ -123,6 +123,16 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
             sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
             state.yaw = atof(requested_data);
 
+            j = 6;
+			g = &t[i+j+2];
+            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+            if(atoi(requested_data)==1)
+            {
+            	state.marker_detected = true;
+            }
+            else
+            	state.marker_detected = false;
+
 		}
 		else {
 			printf("***Unexpected key: %.*s***\n", t[i].end-t[i].start,

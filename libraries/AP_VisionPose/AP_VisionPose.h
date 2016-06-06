@@ -72,6 +72,11 @@ public:
         return state.x;
     }
 
+    bool is_marker_detected(void)
+    {
+    	return state.marker_detected;
+    }
+
 	static const struct AP_Param::GroupInfo var_info[];
 
     // configuration parameters

@@ -74,6 +74,7 @@ Copter::Copter(void) :
     G_Dt(MAIN_LOOP_SECONDS),
     inertial_nav(ahrs),
     attitude_control(ahrs, aparm, motors, MAIN_LOOP_SECONDS),
+    // Here is where the WP_NAV class is initialized
     pos_control(ahrs, inertial_nav, motors, attitude_control,
                 g.p_alt_hold, g.p_vel_z, g.pid_accel_z,
                 g.p_pos_xy, g.pi_vel_xy),
