@@ -14,7 +14,7 @@ float Plane::get_speed_scaler(void)
         if (aspeed > auto_state.highest_airspeed) {
             auto_state.highest_airspeed = aspeed;
         }
-        if (aspeed > 0) {
+        if (aspeed > 0.0001f) {
             speed_scaler = g.scaling_speed / aspeed;
         } else {
             speed_scaler = 2.0;
@@ -200,8 +200,10 @@ void Plane::stabilize_stick_mixing_fbw()
     nav_roll_cd = constrain_int32(nav_roll_cd, -roll_limit_cd, roll_limit_cd);
     
     float pitch_input = channel_pitch->norm_input();
-    if (fabsf(pitch_input) > 0.5f) {
+    if (pitch_input > 0.5f) {
         pitch_input = (3*pitch_input - 1);
+    } else if (pitch_input < -0.5f) {
+        pitch_input = (3*pitch_input + 1);
     }
     if (fly_inverted()) {
         pitch_input = -pitch_input;
@@ -591,11 +593,13 @@ void Plane::flap_slew_limit(int8_t &last_value, int8_t &new_value)
 */
 bool Plane::suppress_throttle(void)
 {
+#if PARACHUTE == ENABLED
     if (auto_throttle_mode && parachute.release_initiated()) {
         // throttle always suppressed in auto-throttle modes after parachute release initiated
         throttle_suppressed = true;
         return true;
     }
+#endif
 
     if (!throttle_suppressed) {
         // we've previously met a condition for unsupressing the throttle
@@ -642,8 +646,6 @@ bool Plane::suppress_throttle(void)
     if (relative_altitude_abs_cm() >= 1000) {
         // we're more than 10m from the home altitude
         throttle_suppressed = false;
-        gcs_send_text_fmt(MAV_SEVERITY_INFO, "Throttle enabled. Altitude %.2f",
-                          (double)(relative_altitude_abs_cm()*0.01f));
         return false;
     }
 
@@ -653,16 +655,12 @@ bool Plane::suppress_throttle(void)
         // groundspeed with bad GPS reception
         if ((!ahrs.airspeed_sensor_enabled()) || airspeed.get_airspeed() >= 5) {
             // we're moving at more than 5 m/s
-            gcs_send_text_fmt(MAV_SEVERITY_INFO, "Throttle enabled. Speed %.2f airspeed %.2f",
-                              (double)gps.ground_speed(),
-                              (double)airspeed.get_airspeed());
             throttle_suppressed = false;
             return false;        
         }
     }
 
     if (quadplane.is_flying()) {
-        gcs_send_text_fmt(MAV_SEVERITY_INFO, "Throttle enabled VTOL");
         throttle_suppressed = false;
     }
 
@@ -1069,6 +1067,12 @@ void Plane::set_servos(void)
             case AP_SpdHgtControl::FLIGHT_TAKEOFF:
             case AP_SpdHgtControl::FLIGHT_LAND_ABORT:
                 if (g.takeoff_flap_percent != 0) {
+                    auto_flap_percent = g.takeoff_flap_percent;
+                }
+                break;
+            case AP_SpdHgtControl::FLIGHT_NORMAL:
+                if (auto_flap_percent != 0 && in_preLaunch_flight_stage()) {
+                    // TODO: move this to a new FLIGHT_PRE_TAKEOFF stage
                     auto_flap_percent = g.takeoff_flap_percent;
                 }
                 break;

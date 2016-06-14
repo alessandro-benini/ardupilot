@@ -121,10 +121,10 @@ void AP_MotorsSingle::output_to_motors()
         case SHUT_DOWN:
             // sends minimum values out to the motors
             hal.rcout->cork();
-            rc_write(AP_MOTORS_MOT_1, calc_pwm_output_1to1(_roll_radio_passthrough+_yaw_radio_passthrough, _servo1));
-            rc_write(AP_MOTORS_MOT_2, calc_pwm_output_1to1(_pitch_radio_passthrough+_yaw_radio_passthrough, _servo2));
-            rc_write(AP_MOTORS_MOT_3, calc_pwm_output_1to1(-_roll_radio_passthrough+_yaw_radio_passthrough, _servo3));
-            rc_write(AP_MOTORS_MOT_4, calc_pwm_output_1to1(-_pitch_radio_passthrough+_yaw_radio_passthrough, _servo4));
+            rc_write(AP_MOTORS_MOT_1, calc_pwm_output_1to1(_roll_radio_passthrough - _yaw_radio_passthrough, _servo1));
+            rc_write(AP_MOTORS_MOT_2, calc_pwm_output_1to1(_pitch_radio_passthrough - _yaw_radio_passthrough, _servo2));
+            rc_write(AP_MOTORS_MOT_3, calc_pwm_output_1to1(-_roll_radio_passthrough - _yaw_radio_passthrough, _servo3));
+            rc_write(AP_MOTORS_MOT_4, calc_pwm_output_1to1(-_pitch_radio_passthrough - _yaw_radio_passthrough, _servo4));
             rc_write(AP_MOTORS_MOT_5, get_pwm_output_min());
             rc_write(AP_MOTORS_MOT_6, get_pwm_output_min());
             hal.rcout->push();
@@ -223,13 +223,14 @@ void AP_MotorsSingle::output_armed_stabilizing()
 
     // combine roll, pitch and yaw on each actuator
     // front servo
-    actuator[0] = rpy_scale * roll_thrust + yaw_thrust;
+
+    actuator[0] = rpy_scale * roll_thrust - yaw_thrust;
     // right servo
-    actuator[1] = rpy_scale * pitch_thrust + yaw_thrust;
+    actuator[1] = rpy_scale * pitch_thrust - yaw_thrust;
     // rear servo
-    actuator[2] = -rpy_scale * roll_thrust + yaw_thrust;
+    actuator[2] = -rpy_scale * roll_thrust - yaw_thrust;
     // left servo
-    actuator[3] = -rpy_scale * pitch_thrust + yaw_thrust;
+    actuator[3] = -rpy_scale * pitch_thrust - yaw_thrust;
 
     // calculate the minimum thrust that doesn't limit the roll, pitch and yaw forces
     thrust_min_rp = MAX(MAX(fabsf(actuator[0]), fabsf(actuator[1])), MAX(fabsf(actuator[2]), fabsf(actuator[3])));
@@ -272,12 +273,16 @@ void AP_MotorsSingle::output_armed_stabilizing()
         } else {
             rpy_scale = 1.0f;
         }
+
+        // limit thrust out for calculation of actuator gains
+        float thrust_out_actuator = MAX(throttle_thrust_hover*0.5,_thrust_out);
+
         // force of a lifting surface is approximately equal to the angle of attack times the airflow velocity squared
         // static thrust is proportional to the airflow velocity squared
         // therefore the torque of the roll and pitch actuators should be approximately proportional to
         // the angle of attack multiplied by the static thrust.
         for (uint8_t i=0; i<NUM_ACTUATORS; i++) {
-            _actuator_out[i] = constrain_float(rpy_scale*actuator[i]/_thrust_out, -1.0f, 1.0f);
+            _actuator_out[i] = constrain_float(rpy_scale*actuator[i]/thrust_out_actuator, -1.0f, 1.0f);
         }
     }
 }

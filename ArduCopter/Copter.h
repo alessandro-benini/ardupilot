@@ -37,7 +37,6 @@
 
 // Application dependencies
 #include <GCS_MAVLink/GCS.h>
-#include <GCS_MAVLink/GCS_MAVLink.h>        // MAVLink GCS definitions
 #include <AP_SerialManager/AP_SerialManager.h>   // Serial manager library
 #include <AP_GPS/AP_GPS.h>             // ArduPilot GPS library
 #include <DataFlash/DataFlash.h>          // ArduPilot Mega Flash Memory Library
@@ -96,6 +95,8 @@
 #include "defines.h"
 #include "config.h"
 
+#include "GCS_Mavlink.h"
+
 // libraries which are dependent on #defines in defines.h and/or config.h
 #if SPRAYER == ENABLED
 #include <AC_Sprayer/AC_Sprayer.h>         // crop sprayer library
@@ -120,7 +121,7 @@
 
 class Copter : public AP_HAL::HAL::Callbacks {
 public:
-    friend class GCS_MAVLINK;
+    friend class GCS_MAVLINK_Copter;
     friend class Parameters;
 
     Copter(void);
@@ -214,7 +215,7 @@ private:
     AP_SerialManager serial_manager;
     static const uint8_t num_gcs = MAVLINK_COMM_NUM_BUFFERS;
 
-    GCS_MAVLINK gcs[MAVLINK_COMM_NUM_BUFFERS];
+    GCS_MAVLINK_Copter gcs[MAVLINK_COMM_NUM_BUFFERS];
 
     // User variables
 #ifdef USERHOOK_VARIABLES
@@ -659,7 +660,6 @@ private:
     void send_rpm(mavlink_channel_t chan);
     void rpm_update();
     void send_pid_tuning(mavlink_channel_t chan);
-    bool telemetry_delayed(mavlink_channel_t chan);
     void gcs_send_message(enum ap_message id);
     void gcs_send_mission_item_reached_message(uint16_t mission_index);
     void gcs_data_stream_send(void);
