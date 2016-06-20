@@ -2,6 +2,8 @@
 
 #include "Copter.h"
 
+#include <unistd.h>
+
 /*
  * control_stabilize.pde - init and run calls for stabilize flight mode
  */
@@ -11,6 +13,8 @@ static bool land_with_vision;
 
 static uint32_t land_start_time;
 static bool land_pause;
+
+int cnt = 0;
 
 bool Copter::vision_land_init(bool ignore_checks)
 {
@@ -58,9 +62,11 @@ bool Copter::vision_land_init(bool ignore_checks)
  */
 void Copter::vision_land_run()
 {
-
+	++cnt;
 	float x = vision_pose.get_x_position();
-	hal.console->printf("Received message: %f\n",x);
+	hal.console->printf("vision_pose.get_x_position() %d\n",cnt);
+	usleep(100000);
+
 
 //	// Here it comes the control system for landing the Helicopter.
 //

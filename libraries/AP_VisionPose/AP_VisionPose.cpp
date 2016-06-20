@@ -31,7 +31,7 @@ void AP_VisionPose::init(AP_HAL::UARTDriver *port, const char *name)
     	driver = new AP_VisionPose_Jetson(*this, state, _port);
     //else
     //	driver = NULL;
-
+    hal.console->printf("Jetson TK1 port initialized\n");
 
 }
 

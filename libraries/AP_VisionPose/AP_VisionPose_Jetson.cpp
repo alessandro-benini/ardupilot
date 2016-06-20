@@ -20,7 +20,7 @@ bool AP_VisionPose_Jetson::read(void)
 	bool parsed = false;
 
 	numc = port->available();
-	hal.console->printf("Number of bytes available on serial: %u", numc);
+	//hal.console->printf("Number of bytes available on serial: %u", numc);
 
 	char msg[200];
 
@@ -32,6 +32,7 @@ bool AP_VisionPose_Jetson::read(void)
 	{
 		// read the next byte
 		c = (char)port->read();
+		hal.console->print(c);
 
 		// Start looking for the JSON string
 		if(c == '{')
@@ -51,7 +52,7 @@ bool AP_VisionPose_Jetson::read(void)
 				{
 					msg[j] = '}';
 					msg[j+1] = '\0';
-					// hal.console->printf("%s",msg);
+					// hal.console->printf("Message: %s",msg);
 					if(decode_JSON(msg))
 						parsed = true;
 				}
@@ -63,7 +64,7 @@ bool AP_VisionPose_Jetson::read(void)
 
 bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 {
-
+	// hal.console->printf("Parsing: %s\n",JSON_STRING);
 	int i;
 	int r;
 	jsmn_parser p;
