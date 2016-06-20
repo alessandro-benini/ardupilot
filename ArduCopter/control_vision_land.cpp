@@ -16,6 +16,9 @@ static bool land_pause;
 
 int cnt = 0;
 
+float prev_value = 0.0f;
+float current_value = 0.0f;
+
 bool Copter::vision_land_init(bool ignore_checks)
 {
 //    // set to position control mode
@@ -63,9 +66,10 @@ bool Copter::vision_land_init(bool ignore_checks)
 void Copter::vision_land_run()
 {
 	++cnt;
-	float x = vision_pose.get_x_position();
-	hal.console->printf("vision_pose.get_x_position() %d\n",cnt);
-	usleep(100000);
+	current_value = vision_pose.get_x_position();
+
+	hal.console->printf("vision_pose.get_x_position() %d %f\n",cnt,current_value);
+	// usleep(30000);
 
 
 //	// Here it comes the control system for landing the Helicopter.

@@ -73,15 +73,17 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 	jsmn_init(&p);
 	r = jsmn_parse(&p, JSON_STRING, strlen(JSON_STRING), t, sizeof(t)/sizeof(t[0]));
 	if (r < 0) {
-		printf("***Failed to parse JSON: %d***\n", r);
+		hal.console->printf("***Failed to parse JSON: %d***\n", r);
 		return false;
 	}
 
 	/* Assume the top-level element is an object */
 	if (r < 1 || t[0].type != JSMN_OBJECT) {
-		printf("***Object expected***\n");
+		hal.console->printf("***Object expected***\n");
 		return false;
 	}
+
+	hal.console->printf("Updating state");
 
 	// Loop over all keys of the root object
 	// The structure of the JSON content is fixed.
@@ -136,9 +138,11 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 
 		}
 		else {
-			printf("***Unexpected key: %.*s***\n", t[i].end-t[i].start,
+			hal.console->printf("***Unexpected key: %.*s***\n", t[i].end-t[i].start,
 					JSON_STRING + t[i].start);
 		}
+
+		hal.console->printf("OK\n");
 	}
 
 	return true;
