@@ -22,7 +22,7 @@ bool AP_VisionPose_Jetson::read(void)
 	numc = port->available();
 	// hal.console->printf("Number of bytes available on serial: %u", numc);
 
-	char msg[200];
+	char msg[30];
 
 	bool found_header = false;
 	uint8_t j = 0;
@@ -52,7 +52,7 @@ bool AP_VisionPose_Jetson::read(void)
 				{
 					msg[j] = '}';
 					msg[j+1] = '\0';
-					// hal.console->printf("Message: %s",msg);
+					hal.console->printf("Message: %s\n",msg);
 					if(decode_JSON(msg))
 						parsed = true;
 				}
@@ -64,7 +64,7 @@ bool AP_VisionPose_Jetson::read(void)
 
 bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 {
-	// hal.console->printf("Parsing: %s\n",JSON_STRING);
+	hal.console->printf("Parsing %s\n",JSON_STRING); // : %s\n",JSON_STRING);
 	int i;
 	int r;
 	jsmn_parser p;
@@ -83,67 +83,98 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 		return false;
 	}
 
-	hal.console->printf("Updating state");
-
-	// Loop over all keys of the root object
-	// The structure of the JSON content is fixed.
+	/* Loop over all keys of the root object */
 	for (i = 1; i < r; i++) {
-		if (jsoneq(JSON_STRING, &t[i], "POSE") == 0) {
-			int j = 0;
+		if (jsoneq(JSON_STRING, &t[i], "POSE") == 0)
+		{
+			int j;
 			if (t[i+1].type != JSMN_ARRAY) {
-				continue; /* We expect groups POSE to be an array of strings */
+				continue; /* We expect POSE to be an array of strings */
 			}
+			//for (j = 0; j < t[i+1].size; j++) {
 
-            // This string will contain the string to be converted in float
-            char requested_data[100];
+				char requested_data[30];
 
-			jsmntok_t *g = &t[i+j+2];
-            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-            state.x = atof(requested_data);
+				jsmntok_t *g = &t[i+j+2];
+				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+				state.x = atof(requested_data);
 
-            j = 1;
-			g = &t[i+j+2];
-            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-            state.y = atof(requested_data);
+				j = 1;
+				g = &t[i+j+2];
+				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+				state.y = atof(requested_data);
 
-            j = 2;
-			g = &t[i+j+2];
-            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-            state.z = atof(requested_data);
+				hal.console->printf("State x,y: %f, %f\n",state.x,state.y);
 
-            j = 3;
-			g = &t[i+j+2];
-            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-            state.roll = atof(requested_data);
-
-            j = 4;
-			g = &t[i+j+2];
-            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-            state.pitch = atof(requested_data);
-
-            j = 5;
-			g = &t[i+j+2];
-            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-            state.yaw = atof(requested_data);
-
-            j = 6;
-			g = &t[i+j+2];
-            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-            if(atoi(requested_data)==1)
-            {
-            	state.marker_detected = true;
-            }
-            else
-            	state.marker_detected = false;
-
-		}
-		else {
-			hal.console->printf("***Unexpected key: %.*s***\n", t[i].end-t[i].start,
+				//jsmntok_t *g = &t[i+j+2];
+				// hal.console->printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
+			//}
+			i += t[i+1].size + 1;
+		} else {
+			hal.console->printf("Unexpected key: %.*s\n", t[i].end-t[i].start,
 					JSON_STRING + t[i].start);
 		}
-
-		hal.console->printf("OK\n");
 	}
+
+//	// Loop over all keys of the root object
+//	// The structure of the JSON content is fixed.
+//	for (i = 1; i < r; i++) {
+//		if (jsoneq(JSON_STRING, &t[i], "POSE") == 0)
+//		{
+//			int j = 0;
+//			if (t[i+1].type != JSMN_ARRAY) {
+//				continue; /* We expect groups POSE to be an array of strings */
+//			}
+//
+//            // This string will contain the string to be converted in float
+//            char requested_data[10];
+//
+//			jsmntok_t *g = &t[i+j+2];
+//            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+//            state.x = atof(requested_data);
+//
+//            j = 1;
+//			g = &t[i+j+2];
+//            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+//            state.y = atof(requested_data);
+////
+////            j = 2;
+////			g = &t[i+j+2];
+////            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+////            state.z = atof(requested_data);
+////
+////            j = 3;
+////			g = &t[i+j+2];
+////            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+////            state.roll = atof(requested_data);
+////
+////            j = 4;
+////			g = &t[i+j+2];
+////            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+////            state.pitch = atof(requested_data);
+////
+////            j = 5;
+////			g = &t[i+j+2];
+////            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+////            state.yaw = atof(requested_data);
+////
+////            j = 6;
+////			g = &t[i+j+2];
+////            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+////            if(atoi(requested_data)==1)
+////            {
+////            	state.marker_detected = true;
+////            }
+////            else
+////            	state.marker_detected = false;
+//
+//		}
+//		else {
+//			hal.console->printf("***Unexpected key: %s\n", t[i].end-t[i].start,
+//					JSON_STRING + t[i].start);
+//		}
+
+// }
 
 	return true;
 }

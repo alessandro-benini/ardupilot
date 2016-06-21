@@ -24,7 +24,7 @@ AP_VisionPose::AP_VisionPose() : _last_instance_swap_ms(0){}
 void AP_VisionPose::init(AP_HAL::UARTDriver *port, const char *name)
 {
     _port = port;
-    _port->begin(9600,70,70);
+    _port->begin(9600,30,0);
     _last_instance_swap_ms = 0;
 
     //if(!strcmp(name, "JETSON"))
