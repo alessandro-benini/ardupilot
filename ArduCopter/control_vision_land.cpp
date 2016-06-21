@@ -68,7 +68,7 @@ void Copter::vision_land_run()
 	++cnt;
 	current_value = vision_pose.get_x_position();
 
-	hal.console->printf("vision_pose.get_x_position() %d %f\n",cnt,current_value);
+	// hal.console->printf("vision_pose.get_x_position() %d %f\n",cnt,current_value);
 	// usleep(30000);
 
 

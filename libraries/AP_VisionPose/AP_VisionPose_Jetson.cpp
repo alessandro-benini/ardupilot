@@ -20,7 +20,7 @@ bool AP_VisionPose_Jetson::read(void)
 	bool parsed = false;
 
 	numc = port->available();
-	//hal.console->printf("Number of bytes available on serial: %u", numc);
+	// hal.console->printf("Number of bytes available on serial: %u", numc);
 
 	char msg[200];
 
