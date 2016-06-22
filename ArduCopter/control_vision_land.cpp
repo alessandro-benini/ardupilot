@@ -21,7 +21,7 @@ float current_value = 0.0f;
 
 bool Copter::vision_land_init(bool ignore_checks)
 {
-//    // set to position control mode
+//  // set to position control mode
 //	// TODO: Double check if this command means that the pilot will take care of the landing manually
 //    guided_mode = Guided_WP;
 //

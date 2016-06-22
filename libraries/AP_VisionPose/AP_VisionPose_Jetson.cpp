@@ -22,7 +22,7 @@ bool AP_VisionPose_Jetson::read(void)
 	numc = port->available();
 	// hal.console->printf("Number of bytes available on serial: %u", numc);
 
-	char msg[30];
+	char msg[70];
 
 	bool found_header = false;
 	uint8_t j = 0;
@@ -104,7 +104,27 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
 				state.y = atof(requested_data);
 
-				hal.console->printf("State x,y: %f, %f\n",state.x,state.y);
+				j = 2;
+				g = &t[i+j+2];
+				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+				state.z = atof(requested_data);
+
+				j = 3;
+				g = &t[i+j+2];
+				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+				state.roll = atof(requested_data);
+
+				j = 4;
+				g = &t[i+j+2];
+				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+				state.pitch = atof(requested_data);
+
+				j = 5;
+				g = &t[i+j+2];
+				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+				state.yaw = atof(requested_data);
+
+//              hal.console->printf("State x,y,z: %f, %f, %f\n",state.x,state.y,state.z);
 
 				//jsmntok_t *g = &t[i+j+2];
 				// hal.console->printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
