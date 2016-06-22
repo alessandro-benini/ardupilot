@@ -44,32 +44,53 @@ public:
     	float yaw;
 
 		// Filtered attitude vector (Roll, Pitch, Yaw) - NED frame
-		AP_Vector3f attitude_f;
+		// AP_Vector3f attitude_f;
 
 		// Filtered position vector - NED frame
-		AP_Vector3f position_f;
+		// AP_Vector3f position_f;
 
 		// Check if the current pose estimation is based on the actual detection
 		// of the marker or is based on the estimation using the Kalman Filter prediction.
 		bool marker_detected;
 
 		// Raw attitude vector (Roll, Pitch, Yaw) - NED frame
-		AP_Vector3f attitude_r;
+		// AP_Vector3f attitude_r;
 
 		// Raw position vector - NED frame
-		AP_Vector3f position_r;
+		// AP_Vector3f position_r;
 
 		// Check if the measure is healthy (for example after CRC check)
-		bool healthy;
+		// bool healthy;
 
         // When we last got data
-        uint32_t    last_update_ms;
+        uint32_t    last_update_msec;
         uint32_t    last_update_usec;
 
 	};
 
     float get_x_position(void) const {
         return state.x;
+    }
+
+    float get_y_position(void) const {
+        return state.y;
+    }
+
+    float get_z_position(void) const {
+        return state.z;
+    }
+
+    float get_roll(void) const {
+        return state.roll;
+    }
+
+    float get_pitch(void) const {
+        return state.pitch;
+    }
+
+
+    float get_yaw(void) const {
+        return state.yaw;
     }
 
     bool is_marker_detected(void)

@@ -16,8 +16,12 @@ static bool land_pause;
 
 int cnt = 0;
 
-float prev_value = 0.0f;
-float current_value = 0.0f;
+float x = 0.0f;
+float y = 0.0f;
+float z = 0.0f;
+float roll = 0.0f;
+float pitch = 0.0f;
+float yaw = 0.0f;
 
 bool Copter::vision_land_init(bool ignore_checks)
 {
@@ -66,9 +70,14 @@ bool Copter::vision_land_init(bool ignore_checks)
 void Copter::vision_land_run()
 {
 	++cnt;
-	current_value = vision_pose.get_x_position();
-
-	// hal.console->printf("vision_pose.get_x_position() %d %f\n",cnt,current_value);
+//	x = vision_pose.get_x_position();
+//	y = vision_pose.get_y_position();
+//	z = vision_pose.get_z_position();
+//	roll = vision_pose.get_roll();
+//	pitch = vision_pose.get_pitch();
+//	yaw = vision_pose.get_yaw();
+//
+//	hal.console->printf("\n\nPOSE: %f,%f,%f,%f,%f,%f\n\n",x,y,z,roll,pitch,yaw);
 	// usleep(30000);
 
 

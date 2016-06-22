@@ -11,6 +11,7 @@
 
 #include "AP_VisionPose.h"
 #include "AP_VisionPose_Backend.h"
+#include <AP_Buffer/AP_Buffer.h>
 
 #include "jsmn.h"
 
@@ -19,4 +20,7 @@ public:
 	AP_VisionPose_Jetson(AP_VisionPose &_vision_pose, AP_VisionPose::VisionPose_State &_state, AP_HAL::UARTDriver *_port);
 	bool read(void);
 	bool decode_JSON(char JSON_STRING[]);
+
+	AP_Buffer<char,80> serial_buffer;
+
 };

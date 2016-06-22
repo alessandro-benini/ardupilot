@@ -66,6 +66,7 @@ private:
 typedef AP_Buffer<float,5> AP_BufferFloat_Size5;
 typedef AP_Buffer<float,15> AP_BufferFloat_Size15;
 
+
 template <class T, uint8_t SIZE>
 AP_Buffer<T,SIZE>::AP_Buffer() :
 	_num_items(0), _head(0)

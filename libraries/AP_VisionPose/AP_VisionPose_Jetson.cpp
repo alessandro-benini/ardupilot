@@ -22,16 +22,20 @@ bool AP_VisionPose_Jetson::read(void)
 	numc = port->available();
 	// hal.console->printf("Number of bytes available on serial: %u", numc);
 
-	char msg[70];
+	char msg[90];
 
 	bool found_header = false;
 	uint8_t j = 0;
 
+	hal.console->print("$$$");
 	// Need to check overflow
 	for (int16_t i = 0; i < numc; i++)
 	{
 		// read the next byte
 		c = (char)port->read();
+
+		serial_buffer.push_back(c);
+
 		hal.console->print(c);
 
 		// Start looking for the JSON string
@@ -55,6 +59,7 @@ bool AP_VisionPose_Jetson::read(void)
 					hal.console->printf("Message: %s\n",msg);
 					if(decode_JSON(msg))
 						parsed = true;
+					found_header = false;
 				}
 			}
 		}
@@ -64,7 +69,7 @@ bool AP_VisionPose_Jetson::read(void)
 
 bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 {
-	hal.console->printf("Parsing %s\n",JSON_STRING); // : %s\n",JSON_STRING);
+	// hal.console->printf("Parsing %s\n",JSON_STRING); // : %s\n",JSON_STRING);
 	int i;
 	int r;
 	jsmn_parser p;
@@ -89,15 +94,19 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 		{
 			int j;
 			if (t[i+1].type != JSMN_ARRAY) {
-				continue; /* We expect POSE to be an array of strings */
+				hal.console->printf("***POSE has to be an array of strings***\n");
+				continue; /*  */
 			}
 			//for (j = 0; j < t[i+1].size; j++) {
 
+			hal.console->printf("Processing...");
 				char requested_data[30];
 
 				jsmntok_t *g = &t[i+j+2];
 				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
 				state.x = atof(requested_data);
+
+
 
 				j = 1;
 				g = &t[i+j+2];
@@ -124,7 +133,10 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
 				state.yaw = atof(requested_data);
 
-//              hal.console->printf("State x,y,z: %f, %f, %f\n",state.x,state.y,state.z);
+				state.last_update_msec =  AP_HAL::millis();
+				state.last_update_usec =  state.last_update_msec / 1000.0f;
+
+                hal.console->printf("Done.\nState x,y,z: %f, %f, %f\n",state.x,state.y,state.z);
 
 				//jsmntok_t *g = &t[i+j+2];
 				// hal.console->printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
