@@ -8,10 +8,11 @@
 #pragma once
 
 #include <cstdio>
+#include <string>
 
 #include "AP_VisionPose.h"
 #include "AP_VisionPose_Backend.h"
-#include <AP_Buffer/AP_Buffer.h>
+#include <AP_Buffer/AP_SerialBuffer.h>
 
 #include "jsmn.h"
 
@@ -21,6 +22,6 @@ public:
 	bool read(void);
 	bool decode_JSON(char JSON_STRING[]);
 
-	AP_Buffer<char,80> serial_buffer;
+	AP_SerialBuffer<char,80> serial_buffer;
 
 };

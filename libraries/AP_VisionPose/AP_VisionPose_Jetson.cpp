@@ -7,6 +7,7 @@
 
 #include "AP_VisionPose.h"
 #include "AP_VisionPose_Jetson.h"
+#include <string>
 
 extern const AP_HAL::HAL& hal;
 
@@ -22,54 +23,96 @@ bool AP_VisionPose_Jetson::read(void)
 	numc = port->available();
 	// hal.console->printf("Number of bytes available on serial: %u", numc);
 
+	// std::string msg;
+
 	char msg[90];
 
+	char check = '\0';
 	bool found_header = false;
 	uint8_t j = 0;
-
+	int head = 0, tail = 0;
 	hal.console->print("$$$");
-	// Need to check overflow
+
+	int idx = 0;
+
 	for (int16_t i = 0; i < numc; i++)
 	{
-		// read the next byte
 		c = (char)port->read();
-
 		serial_buffer.push_back(c);
-
-		hal.console->print(c);
-
-		// Start looking for the JSON string
-		if(c == '{')
+		if (c == '{')
 		{
-			// I've found the header
-			msg[j] = c;
-			found_header = true;
+			head = serial_buffer.get_tail_position();
 		}
-		else
+		if (c == '}')
 		{
-			if(found_header)
+			// tail = serial_buffer.get_tail_position();
+			int index = head - serial_buffer.get_head_position();
+			check = serial_buffer.peek(index);
+			if (check == '{')
 			{
-				j += 1;
-				if(c != '}')
-					msg[j] = c;
-				else
-				{
-					msg[j] = '}';
-					msg[j+1] = '\0';
-					hal.console->printf("Message: %s\n",msg);
-					if(decode_JSON(msg))
-						parsed = true;
-					found_header = false;
-				}
+				do {
+					check = serial_buffer.peek(index);
+					msg[idx] = check;
+					++idx;
+					//msg.push_back(c);
+					++index;
+				} while (check != '}');
+
+//				char *a=new char[msg.size()+1];
+//				a[msg.size()]=0;
+//				memcpy(a,msg.c_str(),msg.size());
+
+				if(decode_JSON(msg))
+					parsed = true;
+				//msg.clear();
+				msg[0] = '\0';
 			}
 		}
 	}
+
 	return parsed;
+
+//		// read the next byte
+//		c = (char)port->read();
+//
+//		serial_buffer.push_back(c);
+//
+//		hal.console->print(c);
+//
+//		// Start looking for the JSON string
+//		if(c == '{')
+//		{
+//			// I've found the header
+//			msg[j] = c;
+//			found_header = true;
+//			hal.console->print("***FH***");
+//		}
+//		else
+//		{
+//			if(found_header)
+//			{
+//
+//				j += 1;
+//				if(c != '}')
+//					msg[j] = c;
+//				else
+//				{
+//					msg[j] = '}';
+//					msg[j+1] = '\0';
+//					hal.console->printf("Message: %s\n",msg);
+//					if(decode_JSON(msg))
+//						parsed = true;
+//					found_header = false;
+//				}
+//			}
+//		}
+//	}
+//	return parsed;
 }
 
 bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 {
-	// hal.console->printf("Parsing %s\n",JSON_STRING); // : %s\n",JSON_STRING);
+	hal.console->printf("Parsing %s\n",JSON_STRING); // : %s\n",JSON_STRING);
 	int i;
 	int r;
 	jsmn_parser p;
