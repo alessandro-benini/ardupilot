@@ -23,14 +23,10 @@ bool AP_VisionPose_Jetson::read(void)
 	numc = port->available();
 	// hal.console->printf("Number of bytes available on serial: %u", numc);
 
-	// std::string msg;
-
 	char msg[90];
 
 	char check = '\0';
-	bool found_header = false;
-	uint8_t j = 0;
-	int head = 0, tail = 0;
+	int head = 0;
 	hal.console->print("$$$");
 
 	int idx = 0;
@@ -45,7 +41,6 @@ bool AP_VisionPose_Jetson::read(void)
 		}
 		if (c == '}')
 		{
-			// tail = serial_buffer.get_tail_position();
 			int index = head - serial_buffer.get_head_position();
 			check = serial_buffer.peek(index);
 			if (check == '{')
@@ -54,60 +49,24 @@ bool AP_VisionPose_Jetson::read(void)
 					check = serial_buffer.peek(index);
 					msg[idx] = check;
 					++idx;
-					//msg.push_back(c);
 					++index;
 				} while (check != '}');
 
-//				char *a=new char[msg.size()+1];
-//				a[msg.size()]=0;
-//				memcpy(a,msg.c_str(),msg.size());
+				msg[idx] = '\0';
 
 				if(decode_JSON(msg))
 					parsed = true;
-				//msg.clear();
+
+				// Reinitialize char array
 				msg[0] = '\0';
+				idx = 0;
+
 			}
 		}
 	}
 
 	return parsed;
 
-//		// read the next byte
-//		c = (char)port->read();
-//
-//		serial_buffer.push_back(c);
-//
-//		hal.console->print(c);
-//
-//		// Start looking for the JSON string
-//		if(c == '{')
-//		{
-//			// I've found the header
-//			msg[j] = c;
-//			found_header = true;
-//			hal.console->print("***FH***");
-//		}
-//		else
-//		{
-//			if(found_header)
-//			{
-//
-//				j += 1;
-//				if(c != '}')
-//					msg[j] = c;
-//				else
-//				{
-//					msg[j] = '}';
-//					msg[j+1] = '\0';
-//					hal.console->printf("Message: %s\n",msg);
-//					if(decode_JSON(msg))
-//						parsed = true;
-//					found_header = false;
-//				}
-//			}
-//		}
-//	}
-//	return parsed;
 }
 
 bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])

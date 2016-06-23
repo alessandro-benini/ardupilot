@@ -35,13 +35,13 @@ public:
 
 	struct VisionPose_State {
 
-    	float x;
-    	float y;
-    	float z;
+    	double x;
+    	double y;
+    	double z;
 
-    	float roll;
-    	float pitch;
-    	float yaw;
+    	double roll;
+    	double pitch;
+    	double yaw;
 
 		// Filtered attitude vector (Roll, Pitch, Yaw) - NED frame
 		// AP_Vector3f attitude_f;
@@ -68,28 +68,28 @@ public:
 
 	};
 
-    float get_x_position(void) const {
+	double get_x_position(void) const {
         return state.x;
     }
 
-    float get_y_position(void) const {
+	double get_y_position(void) const {
         return state.y;
     }
 
-    float get_z_position(void) const {
+	double get_z_position(void) const {
         return state.z;
     }
 
-    float get_roll(void) const {
+	double get_roll(void) const {
         return state.roll;
     }
 
-    float get_pitch(void) const {
+	double get_pitch(void) const {
         return state.pitch;
     }
 
 
-    float get_yaw(void) const {
+	double get_yaw(void) const {
         return state.yaw;
     }
 
