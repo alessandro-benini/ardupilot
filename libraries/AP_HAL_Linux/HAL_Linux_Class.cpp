@@ -326,6 +326,7 @@ void HAL_Linux::run(int argc, char* const argv[], Callbacks* callbacks) const
     rcin->init();
     uartA->begin(115200);
     uartE->begin(115200);
+    // hal.console->Print("\n\n\n****************HAL_LINUX*************\n\n\n");
     uartF->begin(115200);
     analogin->init();
     utilInstance.init(argc+gopt.optind-1, &argv[gopt.optind-1]);

@@ -64,6 +64,9 @@
 #define AP_SERIALMANAGER_SToRM32_BUFSIZE_RX     128
 #define AP_SERIALMANAGER_SToRM32_BUFSIZE_TX     128
 
+#define AP_SERIALMANAGER_JETSON_BAUD			9600
+
+
 class AP_SerialManager {
 
 public:

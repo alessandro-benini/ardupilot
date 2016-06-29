@@ -27,42 +27,60 @@ bool AP_VisionPose_Jetson::read(void)
 
 	char check = '\0';
 	int head = 0;
-	hal.console->print("$$$");
+	// hal.console->print("$");
 
 	int idx = 0;
+
+	double start = 0.0, end = 0.0;
 
 	for (int16_t i = 0; i < numc; i++)
 	{
 		c = (char)port->read();
-		serial_buffer.push_back(c);
-		if (c == '{')
-		{
-			head = serial_buffer.get_tail_position();
-		}
-		if (c == '}')
-		{
-			int index = head - serial_buffer.get_head_position();
-			check = serial_buffer.peek(index);
-			if (check == '{')
-			{
-				do {
-					check = serial_buffer.peek(index);
-					msg[idx] = check;
-					++idx;
-					++index;
-				} while (check != '}');
 
-				msg[idx] = '\0';
+		hal.console->print(c);
 
-				if(decode_JSON(msg))
-					parsed = true;
+//		if(c=='{')
+//		{
+//			start = AP_HAL::micros();
+//		}
+//
+//		if(c=='}')
+//		{
+//			end = AP_HAL::micros();
+//		}
+//
+//		hal.console->printf("\nTime: %f us\n",end-start);
 
-				// Reinitialize char array
-				msg[0] = '\0';
-				idx = 0;
 
-			}
-		}
+//		serial_buffer.push_back(c);
+//		if (c == '{')
+//		{
+//			head = serial_buffer.get_tail_position();
+//		}
+//		if (c == '}')
+//		{
+//			int index = head - serial_buffer.get_head_position();
+//			check = serial_buffer.peek(index);
+//			if (check == '{')
+//			{
+//				do {
+//					check = serial_buffer.peek(index);
+//					msg[idx] = check;
+//					++idx;
+//					++index;
+//				} while (check != '}');
+//
+//				msg[idx] = '\0';
+//
+//				if(decode_JSON(msg))
+//					parsed = true;
+//
+//				// Reinitialize char array
+//				msg[0] = '\0';
+//				idx = 0;
+//
+//			}
+//		}
 	}
 
 	return parsed;
@@ -71,7 +89,7 @@ bool AP_VisionPose_Jetson::read(void)
 
 bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 {
-	hal.console->printf("Parsing %s\n",JSON_STRING); // : %s\n",JSON_STRING);
+	// hal.console->printf("Parsing %s\n",JSON_STRING); // : %s\n",JSON_STRING);
 	int i;
 	int r;
 	jsmn_parser p;
@@ -138,7 +156,7 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 				state.last_update_msec =  AP_HAL::millis();
 				state.last_update_usec =  state.last_update_msec / 1000.0f;
 
-                hal.console->printf("Done.\nState x,y,z: %f, %f, %f\n",state.x,state.y,state.z);
+                hal.console->printf("*** x,y,z: %f, %f, %f***\n",state.x,state.y,state.z);
 
 				//jsmntok_t *g = &t[i+j+2];
 				// hal.console->printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
@@ -149,66 +167,6 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 					JSON_STRING + t[i].start);
 		}
 	}
-
-//	// Loop over all keys of the root object
-//	// The structure of the JSON content is fixed.
-//	for (i = 1; i < r; i++) {
-//		if (jsoneq(JSON_STRING, &t[i], "POSE") == 0)
-//		{
-//			int j = 0;
-//			if (t[i+1].type != JSMN_ARRAY) {
-//				continue; /* We expect groups POSE to be an array of strings */
-//			}
-//
-//            // This string will contain the string to be converted in float
-//            char requested_data[10];
-//
-//			jsmntok_t *g = &t[i+j+2];
-//            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-//            state.x = atof(requested_data);
-//
-//            j = 1;
-//			g = &t[i+j+2];
-//            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-//            state.y = atof(requested_data);
-////
-////            j = 2;
-////			g = &t[i+j+2];
-////            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-////            state.z = atof(requested_data);
-////
-////            j = 3;
-////			g = &t[i+j+2];
-////            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-////            state.roll = atof(requested_data);
-////
-////            j = 4;
-////			g = &t[i+j+2];
-////            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-////            state.pitch = atof(requested_data);
-////
-////            j = 5;
-////			g = &t[i+j+2];
-////            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-////            state.yaw = atof(requested_data);
-////
-////            j = 6;
-////			g = &t[i+j+2];
-////            sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-////            if(atoi(requested_data)==1)
-////            {
-////            	state.marker_detected = true;
-////            }
-////            else
-////            	state.marker_detected = false;
-//
-//		}
-//		else {
-//			hal.console->printf("***Unexpected key: %s\n", t[i].end-t[i].start,
-//					JSON_STRING + t[i].start);
-//		}
-
-// }
 
 	return true;
 }
