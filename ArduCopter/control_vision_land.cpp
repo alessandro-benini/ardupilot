@@ -70,15 +70,15 @@ bool Copter::vision_land_init(bool ignore_checks)
 void Copter::vision_land_run()
 {
 	++cnt;
-//	x = vision_pose.get_x_position();
-//	y = vision_pose.get_y_position();
-//	z = vision_pose.get_z_position();
-//	roll = vision_pose.get_roll();
-//	pitch = vision_pose.get_pitch();
-//	yaw = vision_pose.get_yaw();
-//
-//	hal.console->printf("\n\nPOSE: %f,%f,%f,%f,%f,%f\n\n",x,y,z,roll,pitch,yaw);
-	// usleep(30000);
+	x = vision_pose.get_x_position();
+	y = vision_pose.get_y_position();
+	z = vision_pose.get_z_position();
+	roll = vision_pose.get_roll();
+	pitch = vision_pose.get_pitch();
+	yaw = vision_pose.get_yaw();
+
+	hal.console->printf("\n\nPOSE: %d %f\n\n",cnt,x);
+	// usleep(40000);
 
 
 //	// Here it comes the control system for landing the Helicopter.
