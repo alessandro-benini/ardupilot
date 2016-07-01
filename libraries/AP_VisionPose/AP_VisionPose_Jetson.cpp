@@ -41,7 +41,7 @@ bool AP_VisionPose_Jetson::read(void)
 
 		c = (char)port->read();
 
-		// hal.console->printf("C: %c",c);
+		// hal.console->print(c);
 
 		serial_buffer.push_back(c);
 		if (c == '{')
@@ -145,10 +145,11 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 				state.last_update_msec =  AP_HAL::millis();
 				state.last_update_usec =  state.last_update_msec / 1000.0f;
 
-                // hal.console->printf("*** x,y,z: %f, %f, %f***\n",state.x,state.y,state.z);
+                hal.console->printf("*** x,y,z: %f, %f, %f***\n",state.x,state.y,state.z);
 
 				//jsmntok_t *g = &t[i+j+2];
 				// hal.console->printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
+
 			//}
 			i += t[i+1].size + 1;
 		} else {

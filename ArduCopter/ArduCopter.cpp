@@ -367,7 +367,27 @@ void Copter::update_batt_compass(void)
 // It will run at 25Hz.
 void Copter::update_vision_pose(void)
 {
+
 	vision_pose.update();
+
+	float x = vision_pose.get_x_position();
+	float y = vision_pose.get_y_position();
+	float z = vision_pose.get_z_position();
+	float current_yaw = vision_pose.get_yaw();
+	float ins_yaw = ahrs.yaw_sensor;
+	uint8_t marker_detected;
+	if(vision_pose.is_marker_detected())
+		marker_detected = 1;
+	else
+		marker_detected = 0;
+
+	float yaw_error = 0.0f - current_yaw;
+
+	float target_yaw_rate = 0.2*yaw_error;
+
+	hal.console->printf("***Vision pose: %f %f %f***\n",x,y,z);
+
+	Log_Write_VisionPose(marker_detected,x,y,z,current_yaw,yaw_error,target_yaw_rate);
 }
 
 // ten_hz_logging_loop
