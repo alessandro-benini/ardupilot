@@ -23,7 +23,8 @@ bool AP_VisionPose_Jetson::read(void)
 	bool first_char = false;
 
 	numc = port->available();
-	// hal.console->printf("Number of bytes available on serial: %u", numc);
+
+	// hal.console->printf("Nbytes: %u", numc);
 
 	char msg[90];
 
@@ -39,6 +40,8 @@ bool AP_VisionPose_Jetson::read(void)
 	{
 
 		c = (char)port->read();
+
+		// hal.console->printf("C: %c",c);
 
 		serial_buffer.push_back(c);
 		if (c == '{')
