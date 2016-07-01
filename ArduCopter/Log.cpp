@@ -642,6 +642,8 @@ void Copter::Log_Write_Heli()
 }
 #endif
 
+
+
 // precision landing logging
 struct PACKED log_Precland {
     LOG_PACKET_HEADER;
@@ -712,6 +714,35 @@ void Copter::Log_Write_GuidedTarget(uint8_t target_type, const Vector3f& pos_tar
     DataFlash.WriteBlock(&pkt, sizeof(pkt));
 }
 
+// precision landing logging
+struct PACKED log_VisionPose {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    uint8_t marker;
+    float posX;
+    float posY;
+    float posZ;
+    float yaw;
+    float yawE;
+    float yawR;
+};
+
+void Copter::Log_Write_VisionPose(uint8_t _marker, float _x, float _y, float _z, float _yaw, float _yawE, float _yawR)
+{
+    struct log_VisionPose pkt = {
+        LOG_PACKET_HEADER_INIT(LOG_VISIONLANDING_MSG),
+        time_us	: AP_HAL::micros64(),
+        marker	: _marker,
+        posX    : _x,
+        posY    : _y,
+        posZ    : _z,
+        yaw		: _yaw,
+        yawE    : _yawE,
+        yawR    : _yawR
+    };
+    DataFlash.WriteBlock(&pkt, sizeof(pkt));
+}
+
 const struct LogStructure Copter::log_structure[] = {
     LOG_COMMON_STRUCTURES,
 #if AUTOTUNE_ENABLED == ENABLED
@@ -752,6 +783,8 @@ const struct LogStructure Copter::log_structure[] = {
       "PL",    "QBffffff",    "TimeUS,Heal,bX,bY,eX,eY,pX,pY" },
     { LOG_GUIDEDTARGET_MSG, sizeof(log_GuidedTarget),
       "GUID",  "QBffffff",    "TimeUS,Type,pX,pY,pZ,vX,vY,vZ" },
+    {LOG_VISIONLANDING_MSG, sizeof(log_VisionPose),
+      "VP"	, "QBffffff", "TimeUS,marker,posX,posY,posZ,yaw,yawE,yawR"},
 };
 
 #if CLI_ENABLED == ENABLED

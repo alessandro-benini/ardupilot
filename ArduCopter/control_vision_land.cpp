@@ -31,6 +31,8 @@ float yaw_error = 0.0f;
 float target_yaw_rate = 0.0f;
 float Kp_yaw = 0.2;
 
+uint8_t marker_detected = 0;
+
 bool Copter::vision_land_init(bool ignore_checks)
 {
 	// TODO: Double check all the initializations in this function
@@ -73,9 +75,15 @@ void Copter::vision_land_run()
 
 	// This is the current yaw estimation (if the marker is detected)
 	if(vision_pose.is_marker_detected())
+	{
+		marker_detected = 1;
 		current_yaw = vision_pose.get_yaw();
+	}
 	else
+	{
 		current_yaw = ahrs.yaw_sensor;
+		marker_detected = 0;
+	}
 
 	// I calculate the yaw current yaw error
 	yaw_error = desired_yaw - current_yaw;
@@ -95,5 +103,7 @@ void Copter::vision_land_run()
     // call position controller
     pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
     pos_control.update_z_controller();
+
+    Log_Write_VisionPose(marker_detected,x,y,z,current_yaw,yaw_error,target_yaw_rate);
 
 }
