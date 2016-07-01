@@ -1,4 +1,7 @@
 /// -*- tab-width: 4; Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+// This is the first version of the vision_land based controller.
+// The idea is to align the quadrotor with the marker using the vision based yaw estimation
+// while keeping the current altitude
 
 #include "Copter.h"
 
@@ -21,10 +24,16 @@ float y = 0.0f;
 float z = 0.0f;
 float roll = 0.0f;
 float pitch = 0.0f;
-float yaw = 0.0f;
+// Desired yaw will be probably always zero.
+float desired_yaw = 0.0f;
+float current_yaw = 0.0f;
+float yaw_error = 0.0f;
+float target_yaw_rate = 0.0f;
+float Kp_yaw = 0.2;
 
 bool Copter::vision_land_init(bool ignore_checks)
 {
+	// TODO: Double check all the initializations in this function
 
 	// set target to stopping point
 	Vector3f stopping_point(0.0,0.0,0.0);
@@ -56,11 +65,35 @@ bool Copter::vision_land_init(bool ignore_checks)
  */
 void Copter::vision_land_run()
 {
+
 	++cnt;
 	x = vision_pose.get_x_position();
 	y = vision_pose.get_y_position();
 	z = vision_pose.get_z_position();
-	yaw = vision_pose.get_yaw();
 
-	hal.console->printf("Yaw: %f\n",yaw);
+	// This is the current yaw estimation (if the marker is detected)
+	if(vision_pose.is_marker_detected())
+		current_yaw = vision_pose.get_yaw();
+	else
+		current_yaw = ahrs.yaw_sensor;
+
+	// I calculate the yaw current yaw error
+	yaw_error = desired_yaw - current_yaw;
+
+	// The yaw_error is basically a rate (finite differences) v_yaw = (d_yaw - c_yaw)/dT
+	// Therefore I have a reference for the yaw rate controller.
+	target_yaw_rate = Kp_yaw*yaw_error;
+
+	// Now I can apply the yaw rate reference to the yaw rate controller
+    // Call the attitude controller
+    attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw(0.0, 0.0, target_yaw_rate);
+
+    // get pilot desired climb rate
+    float target_climb_rate = 0.0f;
+    target_climb_rate = constrain_float(target_climb_rate, -g.pilot_velocity_z_max, g.pilot_velocity_z_max);
+
+    // call position controller
+    pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
+    pos_control.update_z_controller();
+
 }
