@@ -11,11 +11,18 @@
 
 extern const AP_HAL::HAL& hal;
 
+AP_Relay relay;
+
 AP_VisionPose_Jetson::AP_VisionPose_Jetson(AP_VisionPose &_vision_pose, AP_VisionPose::VisionPose_State &_state, AP_HAL::UARTDriver *_port) :
-		AP_VisionPose_Backend(_vision_pose, _state, _port) {}
+		AP_VisionPose_Backend(_vision_pose, _state, _port)
+{
+	relay.init();
+}
 
 bool AP_VisionPose_Jetson::read(void)
 {
+	// Toggle relay pin 0 high for starting measuring
+	relay.on(0);
 	char c;
 	int16_t numc;
 	bool parsed = false;
@@ -73,8 +80,11 @@ bool AP_VisionPose_Jetson::read(void)
 			}
 		}
 	}
+	// Toggle relay pin 0 low for stopping measuring
+	relay.off(0);
 
 	return parsed;
+
 
 }
 

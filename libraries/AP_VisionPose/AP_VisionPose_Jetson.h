@@ -14,6 +14,8 @@
 #include "AP_VisionPose_Backend.h"
 #include <AP_Buffer/AP_SerialBuffer.h>
 
+#include <AP_Relay/AP_Relay.h>
+
 #include "jsmn.h"
 
 class AP_VisionPose_Jetson : public AP_VisionPose_Backend {
