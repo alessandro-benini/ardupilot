@@ -22,6 +22,9 @@ AP_VisionPose_Jetson::AP_VisionPose_Jetson(AP_VisionPose &_vision_pose, AP_Visio
 bool AP_VisionPose_Jetson::read(void)
 {
 	// Toggle relay pin 0 high for starting measuring
+	// https://github.com/ArduPilot/ardupilot/issues/785
+	// http://ardupilot.org/copter/docs/common-pixhawk-overview.html
+
 	relay.on(0);
 	char c;
 	int16_t numc;
@@ -84,8 +87,6 @@ bool AP_VisionPose_Jetson::read(void)
 	relay.off(0);
 
 	return parsed;
-
-
 }
 
 bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
@@ -155,7 +156,7 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 				state.last_update_msec =  AP_HAL::millis();
 				state.last_update_usec =  state.last_update_msec / 1000.0f;
 
-                hal.console->printf("*** x,y,z: %f, %f, %f***\n",state.x,state.y,state.z);
+                // hal.console->printf("*** x,y,z: %f, %f, %f***\n",state.x,state.y,state.z);
 
 				//jsmntok_t *g = &t[i+j+2];
 				// hal.console->printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
