@@ -119,54 +119,50 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 				hal.console->printf("***POSE has to be an array of strings***\n");
 				continue; /*  */
 			}
-			//for (j = 0; j < t[i+1].size; j++) {
 
-			// hal.console->printf("Processing...");
-				char requested_data[30];
+			char requested_data[30];
 
-				jsmntok_t *g = &t[i+j+2];
-				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-				state.x = atof(requested_data);
+			jsmntok_t *g = &t[i+j+2];
+			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+			state.marker_detected = atoi(requested_data);
 
-				j = 1;
-				g = &t[i+j+2];
-				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-				state.y = atof(requested_data);
+			j = 1;
+			g = &t[i+j+2];
+			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+			state.x = atof(requested_data);
 
-				j = 2;
-				g = &t[i+j+2];
-				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-				state.z = atof(requested_data);
+			j = 2;
+			g = &t[i+j+2];
+			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+			state.y = atof(requested_data);
 
-				j = 3;
-				g = &t[i+j+2];
-				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-				state.roll = atof(requested_data);
+			j = 3;
+			g = &t[i+j+2];
+			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+			state.z = atof(requested_data);
 
-				j = 4;
-				g = &t[i+j+2];
-				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-				state.pitch = atof(requested_data);
+			j = 4;
+			g = &t[i+j+2];
+			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+			state.roll = atof(requested_data);
 
-				j = 5;
-				g = &t[i+j+2];
-				sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-				state.yaw = atof(requested_data);
+			j = 5;
+			g = &t[i+j+2];
+			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+			state.pitch = atof(requested_data);
 
-				state.last_update_msec =  AP_HAL::millis();
-				state.last_update_usec =  state.last_update_msec / 1000.0f;
+			j = 6;
+			g = &t[i+j+2];
+			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+			state.yaw = atof(requested_data);
 
-                // hal.console->printf("*** x,y,z: %f, %f, %f***\n",state.x,state.y,state.z);
+			state.last_update_msec =  AP_HAL::millis();
+			state.last_update_usec =  state.last_update_msec / 1000.0f;
 
-				//jsmntok_t *g = &t[i+j+2];
-				// hal.console->printf("  * %.*s\n", g->end - g->start, JSON_STRING + g->start);
-
-			//}
 			i += t[i+1].size + 1;
-		} else {
-			hal.console->printf("Unexpected key: %.*s\n", t[i].end-t[i].start,
-					JSON_STRING + t[i].start);
 		}
+		else
+			hal.console->printf("Unexpected key: %.*s\n", t[i].end-t[i].start,JSON_STRING + t[i].start);
 	}
 
 	return true;

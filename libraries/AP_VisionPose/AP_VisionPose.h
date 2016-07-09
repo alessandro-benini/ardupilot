@@ -51,7 +51,7 @@ public:
 
 		// Check if the current pose estimation is based on the actual detection
 		// of the marker or is based on the estimation using the Kalman Filter prediction.
-		bool marker_detected;
+    	uint32_t marker_detected;
 
 		// Raw attitude vector (Roll, Pitch, Yaw) - NED frame
 		// AP_Vector3f attitude_r;
