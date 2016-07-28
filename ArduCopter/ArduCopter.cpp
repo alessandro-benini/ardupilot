@@ -85,7 +85,7 @@
   and the maximum time they are expected to take (in microseconds)
  */
 const AP_Scheduler::Task Copter::scheduler_tasks[] = {
-	SCHED_TASK(update_vision_pose,    25,   2000),
+	SCHED_TASK(update_vision_pose,    40,    500),
     SCHED_TASK(rc_loop,              100,    130),
     SCHED_TASK(throttle_loop,         50,     75),
     SCHED_TASK(update_GPS,            50,    200),
@@ -370,20 +370,22 @@ void Copter::update_vision_pose(void)
 
 	vision_pose.update();
 
-	float x = vision_pose.get_x_position();
-	float y = vision_pose.get_y_position();
-	float z = vision_pose.get_z_position();
-	float current_yaw = vision_pose.get_yaw();
-	float ins_yaw = ahrs.yaw_sensor;
-	uint32_t marker_detected = vision_pose.is_marker_detected();
+//	float x = vision_pose.get_x_position();
+//	float y = vision_pose.get_y_position();
+//	float z = vision_pose.get_z_position();
+//	float current_yaw = vision_pose.get_yaw();
+//	float ins_yaw = ahrs.yaw_sensor;
+//	uint32_t marker_detected = vision_pose.is_marker_detected();
+//	uint32_t frame_number = vision_pose.get_frame_number();
+//
+//	float yaw_error = 0.0f - current_yaw;
+//
+//	float target_yaw_rate = 0.2*yaw_error;
 
-	float yaw_error = 0.0f - current_yaw;
+	// hal.console->printf("%d,%d\n",marker_detected, frame_number);
 
-	float target_yaw_rate = 0.2*yaw_error;
+	// ADD frame number to the log structure
 
-	hal.console->printf("***Vision pose: %d %f %f %f***\n",marker_detected,x,y,z);
-
-	Log_Write_VisionPose(marker_detected,x,y,z,current_yaw,yaw_error,target_yaw_rate);
 }
 
 // ten_hz_logging_loop

@@ -690,7 +690,8 @@ private:
 #if FRAME_CONFIG == HELI_FRAME
     void Log_Write_Heli(void);
 #endif
-    void Log_Write_VisionPose(uint8_t _marker, float _x, float _y, float _z, float _yaw, float _yawE, float _yawR);
+    void Log_Write_VisionPose(uint8_t _marker, int _frame_number, float _x, float _y, float _z, float _yaw, float _yawE, float _yawR);
+    void Log_Write_VisionPose_AH(uint8_t _marker, int _frame_number, float _z, float _altitude_error, float _climb_rate);
     void Log_Write_Precland();
     void Log_Write_GuidedTarget(uint8_t target_type, const Vector3f& pos_target, const Vector3f& vel_target);
     void Log_Write_Vehicle_Startup_Messages();

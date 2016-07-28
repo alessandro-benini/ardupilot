@@ -719,6 +719,7 @@ struct PACKED log_VisionPose {
     LOG_PACKET_HEADER;
     uint64_t time_us;
     uint8_t marker;
+    int frame_n;
     float posX;
     float posY;
     float posZ;
@@ -727,12 +728,13 @@ struct PACKED log_VisionPose {
     float yawR;
 };
 
-void Copter::Log_Write_VisionPose(uint8_t _marker, float _x, float _y, float _z, float _yaw, float _yawE, float _yawR)
+void Copter::Log_Write_VisionPose(uint8_t _marker, int _frame_number, float _x, float _y, float _z, float _yaw, float _yawE, float _yawR)
 {
     struct log_VisionPose pkt = {
         LOG_PACKET_HEADER_INIT(LOG_VISIONLANDING_MSG),
         time_us	: AP_HAL::micros64(),
         marker	: _marker,
+        frame_n : _frame_number,
         posX    : _x,
         posY    : _y,
         posZ    : _z,
@@ -742,6 +744,33 @@ void Copter::Log_Write_VisionPose(uint8_t _marker, float _x, float _y, float _z,
     };
     DataFlash.WriteBlock(&pkt, sizeof(pkt));
 }
+
+// precision landing logging (Altitude Controller)
+struct PACKED log_VisionPose_AH {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    uint8_t marker;
+    int frame_n;
+    float posZ;
+    float alt_err;
+    float c_rate;
+};
+
+void Copter::Log_Write_VisionPose_AH(uint8_t _marker, int _frame_number, float _z, float _altitude_error, float _climb_rate)
+{
+    struct log_VisionPose_AH pkt = {
+        LOG_PACKET_HEADER_INIT(LOG_VL_MSG_AH),
+        time_us	: AP_HAL::micros64(),
+        marker	: _marker,
+        frame_n : _frame_number,
+        posZ    : _z,
+        alt_err : _altitude_error,
+        c_rate  : _climb_rate
+    };
+    DataFlash.WriteBlock(&pkt, sizeof(pkt));
+}
+
+// void Copter::Log_Write_VisionPose_AltitudeController(uint8_t marker_detected, int frame_number, float _z, float _altitude_error, float _target_climb_rate)
 
 const struct LogStructure Copter::log_structure[] = {
     LOG_COMMON_STRUCTURES,
@@ -783,8 +812,8 @@ const struct LogStructure Copter::log_structure[] = {
       "PL",    "QBffffff",    "TimeUS,Heal,bX,bY,eX,eY,pX,pY" },
     { LOG_GUIDEDTARGET_MSG, sizeof(log_GuidedTarget),
       "GUID",  "QBffffff",    "TimeUS,Type,pX,pY,pZ,vX,vY,vZ" },
-    {LOG_VISIONLANDING_MSG, sizeof(log_VisionPose),
-      "VP"	, "QBffffff", "TimeUS,marker,posX,posY,posZ,yaw,yawE,yawR"},
+    { LOG_VISIONLANDING_MSG, sizeof(log_VisionPose), "VP", "QBiffffff", "TimeUS,marker,frameNumber,posX,posY,posZ,yaw,yawE,yawR"},
+    { LOG_VL_MSG_AH, sizeof(log_VisionPose_AH), "VPAH", "QBifff", "TimeUS,marker,frameNumber,posZ,alt_err,c_rate"}
 };
 
 #if CLI_ENABLED == ENABLED

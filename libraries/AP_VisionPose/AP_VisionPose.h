@@ -35,6 +35,12 @@ public:
 
 	struct VisionPose_State {
 
+		// Check if the current pose estimation is based on the actual detection
+		// of the marker or is based on the estimation using the Kalman Filter prediction.
+    	uint32_t marker_detected;
+
+    	// Frame number to to a comparison with the Log files on the Jetson
+    	int    frame_number;
     	double x;
     	double y;
     	double z;
@@ -49,9 +55,6 @@ public:
 		// Filtered position vector - NED frame
 		// AP_Vector3f position_f;
 
-		// Check if the current pose estimation is based on the actual detection
-		// of the marker or is based on the estimation using the Kalman Filter prediction.
-    	uint32_t marker_detected;
 
 		// Raw attitude vector (Roll, Pitch, Yaw) - NED frame
 		// AP_Vector3f attitude_r;
@@ -67,6 +70,11 @@ public:
         uint32_t    last_update_usec;
 
 	};
+
+	int get_frame_number()
+	{
+		return state.frame_number;
+	}
 
 	double get_x_position(void) const {
         return state.x;

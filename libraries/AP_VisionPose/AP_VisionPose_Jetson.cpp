@@ -34,8 +34,6 @@ bool AP_VisionPose_Jetson::read(void)
 
 	numc = port->available();
 
-	// hal.console->printf("Nbytes: %u", numc);
-
 	char msg[90];
 
 	char check = '\0';
@@ -60,6 +58,7 @@ bool AP_VisionPose_Jetson::read(void)
 		}
 		if (c == '}')
 		{
+			hal.console->print("\r\n");
 			int index = head - serial_buffer.get_head_position();
 			check = serial_buffer.peek(index);
 			if (check == '{')
@@ -114,7 +113,7 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 	for (i = 1; i < r; i++) {
 		if (jsoneq(JSON_STRING, &t[i], "POSE") == 0)
 		{
-			int j;
+			int j = 0;
 			if (t[i+1].type != JSMN_ARRAY) {
 				hal.console->printf("***POSE has to be an array of strings***\n");
 				continue; /*  */
@@ -129,29 +128,34 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 			j = 1;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.x = atof(requested_data);
+			state.frame_number = atoi(requested_data);
 
 			j = 2;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.y = atof(requested_data);
+			state.x = atof(requested_data);
 
 			j = 3;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.z = atof(requested_data);
+			state.y = atof(requested_data);
 
 			j = 4;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.roll = atof(requested_data);
+			state.z = atof(requested_data);
 
 			j = 5;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.pitch = atof(requested_data);
+			state.roll = atof(requested_data);
 
 			j = 6;
+			g = &t[i+j+2];
+			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+			state.pitch = atof(requested_data);
+
+			j = 7;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
 			state.yaw = atof(requested_data);
