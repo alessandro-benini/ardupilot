@@ -13,6 +13,8 @@ extern const AP_HAL::HAL& hal;
 
 AP_Relay relay;
 
+float x_ned = 0.0f, y_ned = 0.0f, z_ned = 0.0f;
+
 AP_VisionPose_Jetson::AP_VisionPose_Jetson(AP_VisionPose &_vision_pose, AP_VisionPose::VisionPose_State &_state, AP_HAL::UARTDriver *_port) :
 		AP_VisionPose_Backend(_vision_pose, _state, _port)
 {
@@ -133,17 +135,21 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 			j = 2;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.x = atof(requested_data);
+			x_ned = atof(requested_data);
 
 			j = 3;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.y = atof(requested_data);
+			y_ned = atof(requested_data);
 
 			j = 4;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.z = atof(requested_data);
+			z_ned = atof(requested_data);
+
+			state.x = y_ned / 10.0f;
+			state.y = x_ned / 10.0f;
+			state.z = -z_ned / 10.0f;
 
 			j = 5;
 			g = &t[i+j+2];

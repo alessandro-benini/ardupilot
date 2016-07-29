@@ -35,6 +35,8 @@ uint8_t marker_detected = 0;
 float target_climb_rate = 0.0f;
 float altitude_error = 0.0f;
 
+int cnt = 0;
+
 bool Copter::vision_land_init(bool ignore_checks)
 {
 
@@ -45,8 +47,8 @@ bool Copter::vision_land_init(bool ignore_checks)
     pos_control.set_accel_z(g.pilot_accel_z);
 
     // Initialize the desired position for hovering (100 cm above the marker)
-    pos_control.set_alt_target(100);
-    pos_control.set_desired_velocity_z(0);
+    pos_control.set_alt_target(100.0);
+    pos_control.set_desired_velocity_z(0.0);
 
     // stop takeoff if running
     takeoff_stop();
@@ -85,7 +87,6 @@ bool Copter::vision_land_init(bool ignore_checks)
  */
 void Copter::vision_land_run()
 {
-
     AltHoldModeState althold_state;
 
     marker_detected = vision_pose.is_marker_detected();
@@ -93,17 +94,16 @@ void Copter::vision_land_run()
 
     float takeoff_climb_rate = 0.0f;
 
-    // initialize vertical speeds and acceleration
+    // initialize vertical speeds and acceleration // Limits to the max velocity and acceleration along z axis
     pos_control.set_speed_z(-g.pilot_velocity_z_max, g.pilot_velocity_z_max);
     pos_control.set_accel_z(g.pilot_accel_z);
 
-    // apply SIMPLE mode transform to pilot inputs
-    update_simple_mode();
     z = vision_pose.get_z_position();
 
     // get pilot desired climb rate
     altitude_error = (pos_control.get_alt_target() - z);
-    target_climb_rate = 2.0*altitude_error;
+    target_climb_rate = 250.0*altitude_error;
+
     target_climb_rate = constrain_float(target_climb_rate, -g.pilot_velocity_z_max, g.pilot_velocity_z_max);
 
     // call position controller
@@ -146,7 +146,10 @@ void Copter::vision_land_run()
 //    pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
 //    pos_control.update_z_controller();
 
+    if(cnt%4==0)
     Log_Write_VisionPose_AH(marker_detected, frame_number, z, altitude_error, target_climb_rate);
+
+	cnt++;
 
     // Log_Write_VisionPose_AltitudeController(marker_detected,frame_number,z,altitude_error,target_climb_rate);
 
