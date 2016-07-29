@@ -331,6 +331,23 @@ void AC_PosControl::update_z_controller()
     pos_to_rate_z();
 }
 
+void AC_PosControl::update_z_vel_controller()
+{
+    // check time since last cast
+    uint32_t now = AP_HAL::millis();
+    if (now - _last_update_z_ms > POSCONTROL_ACTIVE_TIMEOUT_MS) {
+        _flags.reset_rate_to_accel_z = true;
+        _flags.reset_accel_to_throttle = true;
+    }
+    _last_update_z_ms = now;
+
+    // check if leash lengths need to be recalculated
+    // calc_leash_length_z();
+
+    // call position controller
+    rate_to_accel_z();
+}
+
 /// calc_leash_length - calculates the vertical leash lengths from maximum speed, acceleration
 ///     called by pos_to_rate_z if z-axis speed or accelerations are changed
 void AC_PosControl::calc_leash_length_z()

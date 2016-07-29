@@ -41,13 +41,13 @@ public:
 
     	// Frame number to to a comparison with the Log files on the Jetson
     	int    frame_number;
-    	double x;
-    	double y;
-    	double z;
+    	float  x;
+    	float  y;
+    	float  z;
 
-    	double roll;
-    	double pitch;
-    	double yaw;
+    	float  roll;
+    	float  pitch;
+    	float  yaw;
 
 		// Filtered attitude vector (Roll, Pitch, Yaw) - NED frame
 		// AP_Vector3f attitude_f;
@@ -76,28 +76,28 @@ public:
 		return state.frame_number;
 	}
 
-	double get_x_position(void) const {
+	float get_x_position(void) const {
         return state.x;
     }
 
-	double get_y_position(void) const {
+	float get_y_position(void) const {
         return state.y;
     }
 
-	double get_z_position(void) const {
+	float get_z_position(void) const {
         return state.z;
     }
 
-	double get_roll(void) const {
+	float get_roll(void) const {
         return state.roll;
     }
 
-	double get_pitch(void) const {
+	float get_pitch(void) const {
         return state.pitch;
     }
 
 
-	double get_yaw(void) const {
+	float get_yaw(void) const {
         return state.yaw;
     }
 
