@@ -12,29 +12,17 @@
  */
 extern const AP_HAL::HAL& hal;
 
-static bool land_with_vision;
+float target_roll = 0.0f, target_pitch = 0.0f;
+float target_yaw_rate = 0.0f;
+float pilot_throttle_scaled = 0.0f;
 
-static uint32_t land_start_time;
-static bool land_pause;
+float altitude_error_cm = 0.0f;
+float posZ_cm = 0.0f;
+float target_climb_rate_cm_s = 0.0f;
+uint8_t marker_detected = 0;
+int frame_number = 0;
 
-//float x = 0.0f;
-//float y = 0.0f;
-//float z = 0.0f;
-//float roll = 0.0f;
-//float pitch = 0.0f;
-//// Desired yaw will be probably always zero.
-//float desired_yaw = 0.0f;
-//float current_yaw = 0.0f;
-//float yaw_error = 0.0f;
-//float target_yaw_rate = 0.0f;
-//float Kp_yaw = 0.2;
-//
-//int frame_number = 0;
-//uint8_t marker_detected = 0;
-//
-//float target_climb_rate = 0.0f;
-//float altitude_error = 0.0f;
-//
+// Counter to log the data
 int cnt = 0;
 
 bool Copter::vision_land_init(bool ignore_checks)
@@ -44,21 +32,19 @@ bool Copter::vision_land_init(bool ignore_checks)
     if (motors.armed() && ap.land_complete && !mode_has_manual_throttle(control_mode) && (get_pilot_desired_throttle(channel_throttle->get_control_in()) > get_non_takeoff_throttle())) {
         return false;
     }
-    // set target altitude to zero for reporting
-    // pos_control.set_alt_target(100.0);
 
     hal.console->printf("***Init vision landing mode***");
-//
-//    // initialize vertical speeds and leash lengths
+
+    // initialize vertical speeds and leash lengths
     pos_control.set_speed_z(-g.pilot_velocity_z_max, g.pilot_velocity_z_max);
     pos_control.set_accel_z(g.pilot_accel_z);
 
     // Initialize the desired position for hovering (100 cm above the marker)
     pos_control.set_alt_target(100.0);
     pos_control.set_desired_velocity_z(0.0);
-//
-//    // stop takeoff if running
-//    takeoff_stop();
+
+    // stop takeoff if running
+    takeoff_stop();
 
     return true;
 }
@@ -71,14 +57,6 @@ bool Copter::vision_land_init(bool ignore_checks)
  */
 void Copter::vision_land_run()
 {
-
-    float target_roll, target_pitch;
-    float target_yaw_rate;
-    float pilot_throttle_scaled;
-
-    float altitude_error_cm;
-    float posZ_cm;
-    float target_climb_rate_cm_s = 0.0f;
 
     // if not armed set throttle to zero and exit immediately
     if (!motors.armed() || ap.throttle_zero || !motors.get_interlock()) {
@@ -96,14 +74,21 @@ void Copter::vision_land_run()
     // apply SIMPLE mode transform to pilot inputs
     update_simple_mode();
 
-    uint8_t marker_detected = vision_pose.is_marker_detected();
-    int frame_number = vision_pose.get_frame_number();
+    frame_number = vision_pose.get_frame_number();
+    marker_detected = vision_pose.is_marker_detected();
 
-    posZ_cm = vision_pose.get_z_position();
-
-	// get pilot desired climb rate
-    altitude_error_cm = (pos_control.get_alt_target() - posZ_cm);
-    target_climb_rate_cm_s = 0.50*altitude_error_cm;
+    if(marker_detected)
+    {
+        posZ_cm = vision_pose.get_z_position();
+    	// get pilot desired climb rate
+        altitude_error_cm = (pos_control.get_alt_target() - posZ_cm);
+        target_climb_rate_cm_s = 0.50*altitude_error_cm;
+        // Make sure that the climb rate is bounded
+    	target_climb_rate_cm_s = constrain_float(target_climb_rate_cm_s, -g.pilot_velocity_z_max, g.pilot_velocity_z_max);
+    }
+    else
+    	// If I didn't detect the marker, I simply keep the current altitude.
+    	target_climb_rate_cm_s = 0.0;
 
     // convert pilot input to lean angles
     // To-Do: convert get_pilot_desired_lean_angles to return angles as floats
@@ -115,58 +100,12 @@ void Copter::vision_land_run()
     // call attitude controller
     attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw_smooth(target_roll, target_pitch, target_yaw_rate, get_smoothing_gain());
 
-    target_climb_rate_cm_s = constrain_float(target_climb_rate_cm_s, -g.pilot_velocity_z_max, g.pilot_velocity_z_max);
-
 	// call position controller
 	pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate_cm_s, G_Dt, false);
-	pos_control.update_z_vel_controller();
+	pos_control.update_z_controller();
 
 	if(cnt%4==0)
 		Log_Write_VisionPose_AH(marker_detected, frame_number, posZ_cm, altitude_error_cm, target_climb_rate_cm_s);
-
 	cnt++;
-
-
-    // body-frame rate controller is run directly from 100hz loop
-
-    // *** NOT SURE ABOUT THE FOLLOWING FUNCTION ***
-    // output pilot's throttle
-    //attitude_control.set_throttle_out(pilot_throttle_scaled, true, g.throttle_filt);
-
-//    // if not armed set throttle to zero and exit immediately
-//    if (!motors.armed() || ap.throttle_zero || !motors.get_interlock()) {
-//        motors.set_desired_spool_state(AP_Motors::DESIRED_SPIN_WHEN_ARMED);
-//        attitude_control.set_throttle_out_unstabilized(0,true,g.throttle_filt);
-//        return;
-//    }
-//
-//    // apply SIMPLE mode transform to pilot inputs
-//    update_simple_mode();
-//
-//    marker_detected = vision_pose.is_marker_detected();
-//    frame_number = vision_pose.get_frame_number();
-//
-//    float takeoff_climb_rate = 0.0f;
-//
-//    // initialize vertical speeds and acceleration // Limits to the max velocity and acceleration along z axis
-//    pos_control.set_speed_z(-g.pilot_velocity_z_max, g.pilot_velocity_z_max);
-//    pos_control.set_accel_z(g.pilot_accel_z);
-//
-//    z = vision_pose.get_z_position();
-//
-//    // get pilot desired climb rate
-//    altitude_error = (pos_control.get_alt_target() - z);
-//    target_climb_rate = 2.0*altitude_error;
-//
-//    target_climb_rate = constrain_float(target_climb_rate, -g.pilot_velocity_z_max, g.pilot_velocity_z_max);
-//
-//    // call position controller
-//    pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate, G_Dt, false);
-//    pos_control.update_z_controller();
-//
-//    if(cnt%4==0)
-//    Log_Write_VisionPose_AH(marker_detected, frame_number, z, altitude_error, target_climb_rate);
-//
-//	cnt++;
 
 }
