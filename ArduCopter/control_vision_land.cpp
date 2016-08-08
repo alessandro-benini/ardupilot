@@ -40,7 +40,7 @@ bool Copter::vision_land_init(bool ignore_checks)
     pos_control.set_accel_z(g.pilot_accel_z);
 
     // Initialize the desired position for hovering (100 cm above the marker)
-    pos_control.set_alt_target(100.0);
+    pos_control.set_alt_target(-100.0);
     pos_control.set_desired_velocity_z(0.0);
 
     // stop takeoff if running
@@ -107,5 +107,8 @@ void Copter::vision_land_run()
 	if(cnt%4==0)
 		Log_Write_VisionPose_AH(marker_detected, frame_number, posZ_cm, altitude_error_cm, target_climb_rate_cm_s);
 	cnt++;
+
+
+
 
 }
