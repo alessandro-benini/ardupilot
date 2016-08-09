@@ -49,21 +49,8 @@ public:
     	float  pitch;
     	float  yaw;
 
-		// Filtered attitude vector (Roll, Pitch, Yaw) - NED frame
-		// AP_Vector3f attitude_f;
-
-		// Filtered position vector - NED frame
-		// AP_Vector3f position_f;
-
-
-		// Raw attitude vector (Roll, Pitch, Yaw) - NED frame
-		// AP_Vector3f attitude_r;
-
-		// Raw position vector - NED frame
-		// AP_Vector3f position_r;
-
 		// Check if the measure is healthy (for example after CRC check)
-		// bool healthy;
+		bool healthy;
 
         // When we last got data
         uint32_t    last_update_msec;
@@ -106,6 +93,11 @@ public:
     	return state.marker_detected;
     }
 
+    bool is_healty(void)
+    {
+    	return state.healthy;
+    }
+
 	static const struct AP_Param::GroupInfo var_info[];
 
     // configuration parameters
@@ -116,6 +108,7 @@ private:
     VisionPose_State state;
     AP_VisionPose_Backend *driver;
     AP_HAL::UARTDriver *_port;
+
 
 };
 

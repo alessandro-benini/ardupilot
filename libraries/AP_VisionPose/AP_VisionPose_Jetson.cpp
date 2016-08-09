@@ -14,6 +14,7 @@ extern const AP_HAL::HAL& hal;
 AP_Relay relay;
 
 float x_ned = 0.0f, y_ned = 0.0f, z_ned = 0.0f;
+uint8_t prev_frame_number = 0;
 
 AP_VisionPose_Jetson::AP_VisionPose_Jetson(AP_VisionPose &_vision_pose, AP_VisionPose::VisionPose_State &_state, AP_HAL::UARTDriver *_port) :
 		AP_VisionPose_Backend(_vision_pose, _state, _port)
@@ -60,7 +61,7 @@ bool AP_VisionPose_Jetson::read(void)
 		}
 		if (c == '}')
 		{
-			hal.console->print("\r\n");
+			// hal.console->print("\r\n");
 			int index = head - serial_buffer.get_head_position();
 			check = serial_buffer.peek(index);
 			if (check == '{')
@@ -132,6 +133,13 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
 			state.frame_number = atoi(requested_data);
 
+			if(state.frame_number != prev_frame_number)
+				state.healthy = true;
+			else
+				state.healthy = false;
+
+			prev_frame_number = state.frame_number;
+
 			j = 2;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
@@ -147,9 +155,10 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
 			z_ned = atof(requested_data);
 
-			state.x = y_ned / 10.0f;
-			state.y = x_ned / 10.0f;
-			state.z = -z_ned / 10.0f;
+			// Conversion from mm to cm.
+			state.x = x_ned / 10.0f;
+			state.y = y_ned / 10.0f;
+			state.z = z_ned / 10.0f;
 
 			j = 5;
 			g = &t[i+j+2];

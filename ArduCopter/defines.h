@@ -284,6 +284,7 @@ enum ThrowModeState {
 #define LOG_GUIDEDTARGET_MSG            0x22
 #define LOG_VISIONLANDING_MSG			0x23
 #define LOG_VL_MSG_AH					0x24
+#define LOG_VL_MSG_XY					0x25
 
 #define MASK_LOG_ATTITUDE_FAST          (1<<0)
 #define MASK_LOG_ATTITUDE_MED           (1<<1)

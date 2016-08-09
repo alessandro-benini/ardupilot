@@ -25,6 +25,8 @@ int frame_number = 0;
 // Counter to log the data
 int cnt = 0;
 
+Vector3f posvel_pos_target_cm(0.0f,0.0f,-100.0f);
+
 bool Copter::vision_land_init(bool ignore_checks)
 {
 
@@ -43,6 +45,10 @@ bool Copter::vision_land_init(bool ignore_checks)
     pos_control.set_alt_target(-100.0);
     pos_control.set_desired_velocity_z(0.0);
 
+    pos_control.set_xy_target(0.0f,0.0f);
+
+    pos_control.set_pos_target(posvel_pos_target_cm);
+
     // stop takeoff if running
     takeoff_stop();
 
@@ -58,6 +64,9 @@ bool Copter::vision_land_init(bool ignore_checks)
 void Copter::vision_land_run()
 {
 
+	float posX_cm = 0.0f, posY_cm = 0.0f;
+	float x_error_cm = 0.0f, y_error_cm = 0.0f;
+	float x_rate = 0.0f, y_rate = 0.0f;
     // if not armed set throttle to zero and exit immediately
     if (!motors.armed() || ap.throttle_zero || !motors.get_interlock()) {
         motors.set_desired_spool_state(AP_Motors::DESIRED_SPIN_WHEN_ARMED);
@@ -77,38 +86,69 @@ void Copter::vision_land_run()
     frame_number = vision_pose.get_frame_number();
     marker_detected = vision_pose.is_marker_detected();
 
-    if(marker_detected)
+    if(marker_detected && vision_pose.is_healty())
     {
-        posZ_cm = vision_pose.get_z_position();
-    	// get pilot desired climb rate
-        altitude_error_cm = (pos_control.get_alt_target() - posZ_cm);
-        target_climb_rate_cm_s = 0.50*altitude_error_cm;
-        // Make sure that the climb rate is bounded
-    	target_climb_rate_cm_s = constrain_float(target_climb_rate_cm_s, -g.pilot_velocity_z_max, g.pilot_velocity_z_max);
+    	posX_cm = vision_pose.get_x_position();
+    	posY_cm = vision_pose.get_y_position();
+    	x_error_cm = 0.0 - posX_cm;
+    	y_error_cm = 0.0 - posY_cm;
+
+    	x_rate = 0.3*x_error_cm;
+    	y_rate = 0.3*y_error_cm;
+
+    	if(x_rate>20.0)
+    		x_rate = 20.0;
+    	if(x_rate < -20.0)
+    		x_rate = -20.0;
+
+    	if(y_rate>20.0)
+    		y_rate = 20.0;
+    	if(y_rate < -20.0)
+    		y_rate = -20.0;
+
+        pos_control.set_desired_velocity_xy(x_rate,y_rate);
     }
     else
-    	// If I didn't detect the marker, I simply keep the current altitude.
-    	target_climb_rate_cm_s = 0.0;
+    	pos_control.set_desired_velocity_xy(0.0f,0.0f);
 
-    // convert pilot input to lean angles
-    // To-Do: convert get_pilot_desired_lean_angles to return angles as floats
-    get_pilot_desired_lean_angles(channel_roll->get_control_in(), channel_pitch->get_control_in(), target_roll, target_pitch, aparm.angle_max);
+    pos_control.update_vel_controller_xyz(ekfNavVelGainScaler);
 
-    // get pilot's desired yaw rate
-    target_yaw_rate = get_pilot_desired_yaw_rate(channel_yaw->get_control_in());
-
-    // call attitude controller
-    attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw_smooth(target_roll, target_pitch, target_yaw_rate, get_smoothing_gain());
-
-	// call position controller
-	pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate_cm_s, G_Dt, false);
-	pos_control.update_z_controller();
-
-	if(cnt%4==0)
-		Log_Write_VisionPose_AH(marker_detected, frame_number, posZ_cm, altitude_error_cm, target_climb_rate_cm_s);
+	if(cnt%2==0)
+		Log_Write_VisionPose_XY(marker_detected, frame_number, posX_cm, posY_cm, x_error_cm, y_error_cm, x_rate, y_rate);
+		//Log_Write_VisionPose_AH(marker_detected, frame_number, posZ_cm, altitude_error_cm, target_climb_rate_cm_s);
 	cnt++;
 
-
+// ********************** ALTITUDE CONTROLLER - DO NOT EDIT BELOW **************
+//    if(marker_detected)
+//    {
+//        posZ_cm = vision_pose.get_z_position();
+//    	// get pilot desired climb rate
+//        altitude_error_cm = (pos_control.get_alt_target() - posZ_cm);
+//        target_climb_rate_cm_s = 0.50*altitude_error_cm;
+//        // Make sure that the climb rate is bounded
+//    	target_climb_rate_cm_s = constrain_float(target_climb_rate_cm_s, -g.pilot_velocity_z_max, g.pilot_velocity_z_max);
+//    }
+//    else
+//    	// If I didn't detect the marker, I simply keep the current altitude.
+//    	target_climb_rate_cm_s = 0.0;
+//
+//    // convert pilot input to lean angles
+//    // To-Do: convert get_pilot_desired_lean_angles to return angles as floats
+//    get_pilot_desired_lean_angles(channel_roll->get_control_in(), channel_pitch->get_control_in(), target_roll, target_pitch, aparm.angle_max);
+//
+//    // get pilot's desired yaw rate
+//    target_yaw_rate = get_pilot_desired_yaw_rate(channel_yaw->get_control_in());
+//
+//    // call attitude controller
+//    attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw_smooth(target_roll, target_pitch, target_yaw_rate, get_smoothing_gain());
+//
+//	// call position controller
+//	pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate_cm_s, G_Dt, false);
+//	pos_control.update_z_controller();
+//
+//	if(cnt%4==0)
+//		Log_Write_VisionPose_AH(marker_detected, frame_number, posZ_cm, altitude_error_cm, target_climb_rate_cm_s);
+//	cnt++;
 
 
 }

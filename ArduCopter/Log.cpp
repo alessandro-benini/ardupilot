@@ -770,7 +770,36 @@ void Copter::Log_Write_VisionPose_AH(uint8_t _marker, int _frame_number, float _
     DataFlash.WriteBlock(&pkt, sizeof(pkt));
 }
 
-// void Copter::Log_Write_VisionPose_AltitudeController(uint8_t marker_detected, int frame_number, float _z, float _altitude_error, float _target_climb_rate)
+// precision landing logging (XY Controller)
+struct PACKED log_VisionPose_XY {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    uint8_t marker;
+    int frame_n;
+    float posX;
+    float posY;
+    float x_err;
+    float y_err;
+    float x_rate;
+    float y_rate;
+};
+
+void Copter::Log_Write_VisionPose_XY(uint8_t _marker, int _frame_number, float _x, float _y, float _x_err, float _y_err, float _x_rate, float _y_rate)
+{
+    struct log_VisionPose_XY pkt = {
+        LOG_PACKET_HEADER_INIT(LOG_VL_MSG_AH),
+        time_us	: AP_HAL::micros64(),
+        marker	: _marker,
+        frame_n : _frame_number,
+        posX    : _x,
+        posY    : _y,
+        x_err   : _x_err,
+        y_err   : _y_err,
+        x_rate  : _x_rate,
+        y_rate  : _y_rate
+    };
+    DataFlash.WriteBlock(&pkt, sizeof(pkt));
+}
 
 const struct LogStructure Copter::log_structure[] = {
     LOG_COMMON_STRUCTURES,
@@ -813,7 +842,8 @@ const struct LogStructure Copter::log_structure[] = {
     { LOG_GUIDEDTARGET_MSG, sizeof(log_GuidedTarget),
       "GUID",  "QBffffff",    "TimeUS,Type,pX,pY,pZ,vX,vY,vZ" },
     { LOG_VISIONLANDING_MSG, sizeof(log_VisionPose), "VP", "QBiffffff", "TimeUS,marker,frameNumber,posX,posY,posZ,yaw,yawE,yawR"},
-    { LOG_VL_MSG_AH, sizeof(log_VisionPose_AH), "VPAH", "QBifff", "TimeUS,marker,frameNumber,posZ,alt_err,c_rate"}
+    { LOG_VL_MSG_AH, sizeof(log_VisionPose_AH), "VPAH", "QBifff", "TimeUS,marker,frameNumber,posZ,alt_err,c_rate"},
+    { LOG_VL_MSG_XY, sizeof(log_VisionPose_XY), "VPXY", "QBiffffff", "TimeUS,marker,frameNumber,posX,posY,xErr,yErr,xRate,yRate"}
 };
 
 #if CLI_ENABLED == ENABLED
