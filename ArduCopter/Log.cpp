@@ -787,7 +787,7 @@ struct PACKED log_VisionPose_XY {
 void Copter::Log_Write_VisionPose_XY(uint8_t _marker, int _frame_number, float _x, float _y, float _x_err, float _y_err, float _x_rate, float _y_rate)
 {
     struct log_VisionPose_XY pkt = {
-        LOG_PACKET_HEADER_INIT(LOG_VL_MSG_AH),
+        LOG_PACKET_HEADER_INIT(LOG_VL_MSG_XY),
         time_us	: AP_HAL::micros64(),
         marker	: _marker,
         frame_n : _frame_number,
