@@ -370,19 +370,19 @@ void Copter::update_vision_pose(void)
 
 	vision_pose.update();
 
-    float x = vision_pose.get_x_position();
+//  float x = vision_pose.get_x_position();
 //	float y = vision_pose.get_y_position();
 //	float z = vision_pose.get_z_position();
 //	float current_yaw = vision_pose.get_yaw();
 //	float ins_yaw = ahrs.yaw_sensor;
-	uint32_t marker_detected = vision_pose.is_marker_detected();
-	uint32_t frame_number = vision_pose.get_frame_number();
+//	uint32_t marker_detected = vision_pose.is_marker_detected();
+//	uint32_t frame_number = vision_pose.get_frame_number();
 //
 //	float yaw_error = 0.0f - current_yaw;
 //
 //	float target_yaw_rate = 0.2*yaw_error;
 
-	hal.console->printf("%f,%d,%d\n",x,marker_detected, frame_number);
+//	hal.console->printf("%f,%d,%d\n",x,marker_detected, frame_number);
 
 	// ADD frame number to the log structure
 
@@ -418,6 +418,9 @@ void Copter::ten_hz_logging_loop()
     if (should_log(MASK_LOG_NTUN) && (mode_requires_GPS(control_mode) || landing_with_GPS())) {
         Log_Write_Nav_Tuning();
     }
+
+    Log_Write_Nav_Tuning();
+
     if (should_log(MASK_LOG_IMU) || should_log(MASK_LOG_IMU_FAST) || should_log(MASK_LOG_IMU_RAW)) {
         DataFlash.Log_Write_Vibration(ins);
     }
