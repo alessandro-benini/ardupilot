@@ -269,6 +269,7 @@ public:
     ///     callers should use get_roll() and get_pitch() methods and sent to the attitude controller
     ///     throttle targets will be sent directly to the motors
     void update_vel_controller_xyz(float ekfNavVelGainScaler);
+    void update_vel_controller_xy(float ekfNavVelGainScaler);
 
     /// get desired roll, pitch which should be fed into stabilize controllers
     float get_roll() const { return _roll_target; }

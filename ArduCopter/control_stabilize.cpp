@@ -56,4 +56,9 @@ void Copter::stabilize_run()
 
     // output pilot's throttle
     attitude_control.set_throttle_out(pilot_throttle_scaled, true, g.throttle_filt);
+
+//	if(cnt%2==0)
+//		// Log_Write_VisionPose_XY(marker_detected, frame_number, posX_cm, posY_cm, x_error_cm, y_error_cm, x_rate, y_rate);
+//		Log_Write_VisionPose_AH(0, 0, 0.0, 0.0, pilot_throttle_scaled);
+//	cnt++;
 }
