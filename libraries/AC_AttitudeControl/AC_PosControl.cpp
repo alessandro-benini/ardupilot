@@ -331,6 +331,23 @@ void AC_PosControl::update_z_controller()
     pos_to_rate_z();
 }
 
+void AC_PosControl::_update_z_controller(uint8_t marker_detected, float curr_alt)
+{
+    // check time since last cast
+    uint32_t now = AP_HAL::millis();
+    if (now - _last_update_z_ms > POSCONTROL_ACTIVE_TIMEOUT_MS) {
+        _flags.reset_rate_to_accel_z = true;
+        _flags.reset_accel_to_throttle = true;
+    }
+    _last_update_z_ms = now;
+
+    // check if leash lengths need to be recalculated
+    calc_leash_length_z();
+
+    // call position controller
+    _pos_to_rate_z(marker_detected,curr_alt);
+}
+
 void AC_PosControl::update_z_vel_controller()
 {
     // check time since last cast
@@ -365,6 +382,65 @@ void AC_PosControl::calc_leash_length_z()
 void AC_PosControl::pos_to_rate_z()
 {
     float curr_alt = _inav.get_altitude();
+
+    // clear position limit flags
+    _limit.pos_up = false;
+    _limit.pos_down = false;
+
+    // calculate altitude error
+    _pos_error.z = _pos_target.z - curr_alt;
+
+    // do not let target altitude get too far from current altitude
+    if (_pos_error.z > _leash_up_z) {
+        _pos_target.z = curr_alt + _leash_up_z;
+        _pos_error.z = _leash_up_z;
+        _limit.pos_up = true;
+    }
+    if (_pos_error.z < -_leash_down_z) {
+        _pos_target.z = curr_alt - _leash_down_z;
+        _pos_error.z = -_leash_down_z;
+        _limit.pos_down = true;
+    }
+
+    // calculate _vel_target.z using from _pos_error.z using sqrt controller
+    _vel_target.z = AC_AttitudeControl::sqrt_controller(_pos_error.z, _p_pos_z.kP(), _accel_z_cms);
+
+    // check speed limits
+    // To-Do: check these speed limits here or in the pos->rate controller
+    _limit.vel_up = false;
+    _limit.vel_down = false;
+    if (_vel_target.z < _speed_down_cms) {
+        _vel_target.z = _speed_down_cms;
+        _limit.vel_down = true;
+    }
+    if (_vel_target.z > _speed_up_cms) {
+        _vel_target.z = _speed_up_cms;
+        _limit.vel_up = true;
+    }
+
+    // add feed forward component
+    if (_flags.use_desvel_ff_z) {
+        _vel_target.z += _vel_desired.z;
+    }
+
+    // call rate based throttle controller which will update accel based throttle controller targets
+    rate_to_accel_z();
+}
+
+void AC_PosControl::_pos_to_rate_z(uint8_t marker_detected, float _curr_alt)
+{
+	float curr_alt;
+
+	if(marker_detected == 1)
+	{
+		curr_alt = _curr_alt;
+		//hal.console->printf("alt_M: %f\n",curr_alt);
+	}
+	else
+	{
+		curr_alt = _inav.get_altitude();
+		//hal.console->printf("alt_B: %f\n",curr_alt);
+	}
 
     // clear position limit flags
     _limit.pos_up = false;

@@ -166,7 +166,7 @@ public:
 
     /// update_z_controller - fly to altitude in cm above home
     void update_z_controller();
-
+    void _update_z_controller(uint8_t marker_detected, float curr_alt);
     /// update z velocity controller bypassing the position controller - fly to altitude in cm above home
     void update_z_vel_controller();
 
@@ -328,6 +328,8 @@ private:
     //          set_target_to_stopping_point_z
     //          init_takeoff
     void pos_to_rate_z();
+
+    void _pos_to_rate_z(uint8_t marker_detected, float _curr_alt);
 
     // rate_to_accel_z - calculates desired accel required to achieve the velocity target
     void rate_to_accel_z();

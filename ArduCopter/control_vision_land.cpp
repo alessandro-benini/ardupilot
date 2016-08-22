@@ -16,11 +16,6 @@ extern const AP_HAL::HAL& hal;
 // float target_yaw_rate = 0.0f;
 // float pilot_throttle_scaled = 0.0f;
 
-float altitude_error_cm = 0.0f;
-float posZ_cm = 0.0f;
-float target_climb_rate_cm_s = 0.0f;
-uint8_t marker_detected = 0;
-int frame_number = 0;
 
 // Counter to log the data
 int cnt = 0;
@@ -44,8 +39,8 @@ bool Copter::vision_land_init(bool ignore_checks)
     pos_control.set_accel_z(g.pilot_accel_z);
 
     // initialise position and desired velocity
-    pos_control.set_alt_target(-100.0);
-    pos_control.set_desired_velocity_z(inertial_nav.get_velocity_z());
+    pos_control.set_alt_target(130.0);
+    // pos_control.set_desired_velocity_z(inertial_nav.get_velocity_z());
 
     base_throttle = channel_throttle->get_control_in();
 
@@ -68,6 +63,15 @@ void Copter::vision_land_run()
 	float x_error_cm = 0.0f, y_error_cm = 0.0f;
 	float x_rate = 0.0f, y_rate = 0.0f;
 
+	float altitude_error_cm = 0.0f;
+	float posZ_cm = 0.0f;
+	float target_climb_rate_cm_s = 0.0f;
+	uint8_t marker_detected = 0;
+	int frame_number = 0;
+
+    float target_roll, target_pitch;
+    float target_yaw_rate;
+
     float pilot_throttle_scaled;
 
     // initialize vertical speeds and acceleration
@@ -89,20 +93,43 @@ void Copter::vision_land_run()
     frame_number = vision_pose.get_frame_number();
     marker_detected = vision_pose.is_marker_detected();
 
-	if(marker_detected)
-	{
-		posZ_cm = vision_pose.get_z_position();
-		// get pilot desired climb rate
-		altitude_error_cm = (-100.0 - posZ_cm);
-		target_climb_rate_cm_s = 0.75*altitude_error_cm;
-		// Make sure that the climb rate is bounded
-		target_climb_rate_cm_s = constrain_float(target_climb_rate_cm_s, -g.pilot_velocity_z_max, g.pilot_velocity_z_max);
-	}
-	else
-		// If I didn't detect the marker, I simply keep the current altitude.
-		target_climb_rate_cm_s = 0.0;
+    get_pilot_desired_lean_angles(channel_roll->get_control_in(), channel_pitch->get_control_in(), target_roll, target_pitch, aparm.angle_max);
 
-	total_throttle = (float)base_throttle + target_climb_rate_cm_s;
+    // get pilot's desired yaw rate
+    target_yaw_rate = get_pilot_desired_yaw_rate(channel_yaw->get_control_in());
+
+    posZ_cm = vision_pose.get_z_position();
+
+	// pos_control._pos_to_rate_z(marker_detected, posZ_cm);
+	pos_control._update_z_controller(marker_detected, -posZ_cm);
+
+//	if(marker_detected)
+//	{
+//		posZ_cm = vision_pose.get_z_position();
+//		// get pilot desired climb rate
+//		altitude_error_cm = (-130.0 - posZ_cm);
+//		target_climb_rate_cm_s = 0.9*altitude_error_cm;
+//		// Make sure that the climb rate is bounded
+//		target_climb_rate_cm_s = constrain_float(target_climb_rate_cm_s, -g.pilot_velocity_z_max, g.pilot_velocity_z_max);
+//	}
+//	else
+//		// If I didn't detect the marker, I simply keep the current altitude.
+//		target_climb_rate_cm_s = 0.0;
+//
+//	pos_control.set_desired_velocity_z(target_climb_rate_cm_s);
+
+
+
+    // call attitude controller
+    attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw_smooth(target_roll, target_pitch, target_yaw_rate, get_smoothing_gain());
+
+	if(cnt%2==0)
+		// Log_Write_VisionPose_XY(marker_detected, frame_number, posX_cm, posY_cm, x_error_cm, y_error_cm, x_rate, y_rate);
+		Log_Write_VisionPose_AH(marker_detected, frame_number, posZ_cm, altitude_error_cm, total_throttle);
+	cnt++;
+
+
+	// total_throttle = (float)base_throttle + target_climb_rate_cm_s;
 
 //    if(marker_detected && vision_pose.is_healty())
 //    {
@@ -135,11 +162,9 @@ void Copter::vision_land_run()
 //    pilot_throttle_scaled = get_pilot_desired_throttle(channel_throttle->get_control_in());
 
     //attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw_smooth(pos_control.get_roll(), pos_control.get_pitch(), 0.0, get_smoothing_gain());
-    attitude_control.set_throttle_out(total_throttle, true, g.throttle_filt);
+    // attitude_control.set_throttle_out(total_throttle, true, g.throttle_filt);
 
-	if(cnt%2==0)
-		// Log_Write_VisionPose_XY(marker_detected, frame_number, posX_cm, posY_cm, x_error_cm, y_error_cm, x_rate, y_rate);
-		Log_Write_VisionPose_AH(marker_detected, frame_number, posZ_cm, altitude_error_cm, total_throttle);
-	cnt++;
+//    pos_control.set_alt_target_from_climb_rate_ff(target_climb_rate_cm_s, G_Dt, false);
+//    pos_control.update_z_controller();
 
 }
