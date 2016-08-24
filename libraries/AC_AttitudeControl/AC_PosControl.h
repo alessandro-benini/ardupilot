@@ -245,6 +245,8 @@ public:
     /// update_xy_controller - run the horizontal position controller - should be called at 100hz or higher
     ///     when use_desired_velocity is true the desired velocity (i.e. feed forward) is incorporated at the pos_to_rate step
     void update_xy_controller(xy_mode mode, float ekfNavVelGainScaler, bool use_althold_lean_angle);
+    void _update_xy_controller(xy_mode mode, float ekfNavVelGainScaler, bool use_althold_lean_angle, uint8_t marker_detected, float _curr_pos_x, float _curr_pos_y);
+    void _pos_to_rate_xy(xy_mode mode, float dt, float ekfNavVelGainScaler, uint8_t marker_detected, float _curr_pos_x, float _curr_pos_y);
 
     /// set_target_to_stopping_point_xy - sets horizontal target to reasonable stopping position in cm from home
     void set_target_to_stopping_point_xy();

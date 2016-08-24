@@ -760,6 +760,34 @@ void AC_PosControl::update_xy_controller(xy_mode mode, float ekfNavVelGainScaler
     accel_to_lean_angles(dt, ekfNavVelGainScaler, use_althold_lean_angle);
 }
 
+void AC_PosControl::_update_xy_controller(xy_mode mode, float ekfNavVelGainScaler, bool use_althold_lean_angle, uint8_t marker_detected, float _curr_pos_x, float _curr_pos_y)
+{
+    // compute dt
+    uint32_t now = AP_HAL::millis();
+    float dt = (now - _last_update_xy_ms) / 1000.0f;
+    _last_update_xy_ms = now;
+
+    // sanity check dt - expect to be called faster than ~5hz
+    if (dt > POSCONTROL_ACTIVE_TIMEOUT_MS*1.0e-3f) {
+        dt = 0.0f;
+    }
+
+    // check if xy leash needs to be recalculated
+    calc_leash_length_xy();
+
+    // translate any adjustments from pilot to loiter target
+    desired_vel_to_pos(dt);
+
+    // run position controller's position error to desired velocity step
+    _pos_to_rate_xy(mode, dt, ekfNavVelGainScaler, marker_detected, _curr_pos_x, _curr_pos_y);
+
+    // run position controller's velocity to acceleration step
+    rate_to_accel_xy(dt, ekfNavVelGainScaler);
+
+    // run position controller's acceleration to lean angle step
+    accel_to_lean_angles(dt, ekfNavVelGainScaler, use_althold_lean_angle);
+}
+
 float AC_PosControl::time_since_last_xy_update() const
 {
     uint32_t now = AP_HAL::millis();
@@ -908,6 +936,94 @@ void AC_PosControl::desired_vel_to_pos(float nav_dt)
 void AC_PosControl::pos_to_rate_xy(xy_mode mode, float dt, float ekfNavVelGainScaler)
 {
     Vector3f curr_pos = _inav.get_position();
+    float linear_distance;      // the distance we swap between linear and sqrt velocity response
+    float kP = ekfNavVelGainScaler * _p_pos_xy.kP(); // scale gains to compensate for noisy optical flow measurement in the EKF
+
+    // avoid divide by zero
+    if (kP <= 0.0f) {
+        _vel_target.x = 0.0f;
+        _vel_target.y = 0.0f;
+    }else{
+        // calculate distance error
+        _pos_error.x = _pos_target.x - curr_pos.x;
+        _pos_error.y = _pos_target.y - curr_pos.y;
+
+        // constrain target position to within reasonable distance of current location
+        _distance_to_target = norm(_pos_error.x, _pos_error.y);
+        if (_distance_to_target > _leash && _distance_to_target > 0.0f) {
+            _pos_target.x = curr_pos.x + _leash * _pos_error.x/_distance_to_target;
+            _pos_target.y = curr_pos.y + _leash * _pos_error.y/_distance_to_target;
+            // re-calculate distance error
+            _pos_error.x = _pos_target.x - curr_pos.x;
+            _pos_error.y = _pos_target.y - curr_pos.y;
+            _distance_to_target = _leash;
+        }
+
+        // calculate the distance at which we swap between linear and sqrt velocity response
+        linear_distance = _accel_cms/(2.0f*kP*kP);
+
+        if (_distance_to_target > 2.0f*linear_distance) {
+            // velocity response grows with the square root of the distance
+            float vel_sqrt = safe_sqrt(2.0f*_accel_cms*(_distance_to_target-linear_distance));
+            _vel_target.x = vel_sqrt * _pos_error.x/_distance_to_target;
+            _vel_target.y = vel_sqrt * _pos_error.y/_distance_to_target;
+        }else{
+            // velocity response grows linearly with the distance
+            _vel_target.x = _p_pos_xy.kP() * _pos_error.x;
+            _vel_target.y = _p_pos_xy.kP() * _pos_error.y;
+        }
+
+        if (mode == XY_MODE_POS_LIMITED_AND_VEL_FF) {
+            // this mode is for loiter - rate-limiting the position correction
+            // allows the pilot to always override the position correction in
+            // the event of a disturbance
+
+            // scale velocity within limit
+            float vel_total = norm(_vel_target.x, _vel_target.y);
+            if (vel_total > POSCONTROL_VEL_XY_MAX_FROM_POS_ERR) {
+                _vel_target.x = POSCONTROL_VEL_XY_MAX_FROM_POS_ERR * _vel_target.x/vel_total;
+                _vel_target.y = POSCONTROL_VEL_XY_MAX_FROM_POS_ERR * _vel_target.y/vel_total;
+            }
+
+            // add velocity feed-forward
+            _vel_target.x += _vel_desired.x;
+            _vel_target.y += _vel_desired.y;
+        } else {
+            if (mode == XY_MODE_POS_AND_VEL_FF) {
+                // add velocity feed-forward
+                _vel_target.x += _vel_desired.x;
+                _vel_target.y += _vel_desired.y;
+            }
+
+            // scale velocity within speed limit
+            float vel_total = norm(_vel_target.x, _vel_target.y);
+            if (vel_total > _speed_cms) {
+                _vel_target.x = _speed_cms * _vel_target.x/vel_total;
+                _vel_target.y = _speed_cms * _vel_target.y/vel_total;
+            }
+        }
+    }
+}
+
+void AC_PosControl::_pos_to_rate_xy(xy_mode mode, float dt, float ekfNavVelGainScaler, uint8_t marker_detected, float _curr_pos_x, float _curr_pos_y)
+{
+	Vector3f curr_pos; //  = _inav.get_position();
+
+	if(marker_detected == 1)
+	{
+		curr_pos.x = _curr_pos_x;
+		curr_pos.y = _curr_pos_y;
+
+		// hal.console->printf("M: %f %f\n",curr_pos.x,curr_pos.y);
+	}
+	else
+	{
+		curr_pos.x = 0.0f;
+		curr_pos.y = 0.0f;
+		// hal.console->printf("I: %f %f\n",curr_pos.x,curr_pos.y);
+	}
+
+
     float linear_distance;      // the distance we swap between linear and sqrt velocity response
     float kP = ekfNavVelGainScaler * _p_pos_xy.kP(); // scale gains to compensate for noisy optical flow measurement in the EKF
 

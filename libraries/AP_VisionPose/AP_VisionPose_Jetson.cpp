@@ -28,7 +28,7 @@ bool AP_VisionPose_Jetson::read(void)
 	// https://github.com/ArduPilot/ardupilot/issues/785
 	// http://ardupilot.org/copter/docs/common-pixhawk-overview.html
 
-	relay.on(0);
+	// relay.on(0);
 	char c;
 	int16_t numc;
 	bool parsed = false;
@@ -86,7 +86,7 @@ bool AP_VisionPose_Jetson::read(void)
 		}
 	}
 	// Toggle relay pin 0 low for stopping measuring
-	relay.off(0);
+	// relay.off(0);
 
 	return parsed;
 }
