@@ -54,6 +54,10 @@ void Copter::stabilize_run()
 
     // body-frame rate controller is run directly from 100hz loop
 
+    // try to reset the vision based control system
+	pos_control.set_target_pitch(0.0f);
+	pos_control.set_target_roll(0.0f);
+
     // output pilot's throttle
     attitude_control.set_throttle_out(pilot_throttle_scaled, true, g.throttle_filt);
 

@@ -10,6 +10,7 @@
 #include <AP_HAL/AP_HAL.h>
 #include <inttypes.h>
 #include <AP_SerialManager/AP_SerialManager.h>
+#include <pthread.h>
 
 // For the moment the maximum number of vision pose sensors is limited to 1.
 #define VISION_POSE_MAX_INSTANCES 1
@@ -33,70 +34,28 @@ public:
     /// more) to process incoming data.
     void update(void);
 
-	struct VisionPose_State {
+    struct VisionPose_State {
 
-		// Check if the current pose estimation is based on the actual detection
-		// of the marker or is based on the estimation using the Kalman Filter prediction.
+    	// Check if the current pose estimation is based on the actual detection
+    	// of the marker or is based on the estimation using the Kalman Filter prediction.
     	uint32_t marker_detected;
 
     	// Frame number to to a comparison with the Log files on the Jetson
     	int    frame_number;
-    	float  x;
-    	float  y;
-    	float  z;
 
-    	float  roll;
-    	float  pitch;
-    	float  yaw;
+    	Vector3f position;
+    	Vector3f attitude;
 
-		// Check if the measure is healthy (for example after CRC check)
-		bool healthy;
+    	// Check if the measure is healthy (for example after CRC check)
+    	bool healthy;
 
         // When we last got data
         uint32_t    last_update_msec;
         uint32_t    last_update_usec;
 
-	};
+    };
 
-	int get_frame_number()
-	{
-		return state.frame_number;
-	}
-
-	float get_x_position(void) const {
-        return state.x;
-    }
-
-	float get_y_position(void) const {
-        return state.y;
-    }
-
-	float get_z_position(void) const {
-        return state.z;
-    }
-
-	float get_roll(void) const {
-        return state.roll;
-    }
-
-	float get_pitch(void) const {
-        return state.pitch;
-    }
-
-
-	float get_yaw(void) const {
-        return state.yaw;
-    }
-
-    bool is_marker_detected(void)
-    {
-    	return state.marker_detected;
-    }
-
-    bool is_healty(void)
-    {
-    	return state.healthy;
-    }
+    VisionPose_State* getState();
 
 	static const struct AP_Param::GroupInfo var_info[];
 
@@ -108,7 +67,5 @@ private:
     VisionPose_State state;
     AP_VisionPose_Backend *driver;
     AP_HAL::UARTDriver *_port;
-
-
 };
 

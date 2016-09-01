@@ -131,14 +131,14 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 			j = 1;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.frame_number = atoi(requested_data);
+			current_state.frame_number = atoi(requested_data);
 
-			if(state.frame_number != prev_frame_number)
-				state.healthy = true;
+			if(current_state.frame_number != prev_frame_number)
+				current_state.healthy = true;
 			else
-				state.healthy = false;
+				current_state.healthy = false;
 
-			prev_frame_number = state.frame_number;
+			prev_frame_number = current_state.frame_number;
 
 			j = 2;
 			g = &t[i+j+2];
@@ -156,29 +156,31 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 			z_ned = atof(requested_data);
 
 			// Conversion from mm to cm.
-			state.x = x_ned / 10.0f;
-			state.y = y_ned / 10.0f;
-			state.z = z_ned / 10.0f;
+			current_state.position.x = x_ned / 10.0f;
+			current_state.position.y = y_ned / 10.0f;
+			current_state.position.z = z_ned / 10.0f;
 
 			j = 5;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.roll = atof(requested_data);
+			current_state.attitude.x = atof(requested_data);
 
 			j = 6;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.pitch = atof(requested_data);
+			current_state.attitude.y = atof(requested_data);
 
 			j = 7;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.yaw = atof(requested_data);
+			current_state.attitude.z = atof(requested_data);
 
-			state.last_update_msec =  AP_HAL::millis();
-			state.last_update_usec =  state.last_update_msec / 1000.0f;
+			current_state.last_update_msec = AP_HAL::millis();
+			current_state.last_update_usec = current_state.last_update_msec / 1000.0f;
 
 			i += t[i+1].size + 1;
+
+			setState(&current_state);
 		}
 		else
 			hal.console->printf("Unexpected key: %.*s\n", t[i].end-t[i].start,JSON_STRING + t[i].start);

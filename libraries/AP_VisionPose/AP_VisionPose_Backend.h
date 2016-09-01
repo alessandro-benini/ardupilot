@@ -23,10 +23,13 @@ public:
     // valid packet from the GPS.
     virtual bool read() = 0;
 
+	void setState(AP_VisionPose::VisionPose_State* _state);
+	AP_VisionPose::VisionPose_State* getState();
+
 protected:
     AP_HAL::UARTDriver *port;              		///< UART we are attached to
     AP_VisionPose &vision_pose;                 ///< access to frontend (for parameters)
     AP_VisionPose::VisionPose_State &state;     ///< public state for this instance
-
+    pthread_mutex_t visionpose_mutex;
 };
 

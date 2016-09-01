@@ -24,6 +24,8 @@ public:
 	bool read(void);
 	bool decode_JSON(char JSON_STRING[]);
 
+	AP_VisionPose::VisionPose_State current_state;
+
 	AP_SerialBuffer<char,80> serial_buffer;
 
 };

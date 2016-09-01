@@ -42,3 +42,8 @@ void AP_VisionPose::update(void)
 	driver->read();
 }
 
+AP_VisionPose::VisionPose_State* AP_VisionPose::getState()
+{
+	return driver->getState();
+}
+

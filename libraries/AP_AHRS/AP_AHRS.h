@@ -350,6 +350,10 @@ public:
         return _sin_yaw;
     }
 
+    float get_yaw() const {
+    	return yaw;
+    }
+
     // for holding parameters
     static const struct AP_Param::GroupInfo var_info[];
 
