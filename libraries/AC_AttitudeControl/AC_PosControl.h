@@ -245,8 +245,8 @@ public:
     /// update_xy_controller - run the horizontal position controller - should be called at 100hz or higher
     ///     when use_desired_velocity is true the desired velocity (i.e. feed forward) is incorporated at the pos_to_rate step
     void update_xy_controller(xy_mode mode, float ekfNavVelGainScaler, bool use_althold_lean_angle);
-    void _update_xy_controller(xy_mode mode, float ekfNavVelGainScaler, bool use_althold_lean_angle, uint8_t marker_detected, float _curr_pos_x, float _curr_pos_y, float _curr_pos_z);
-    void _pos_to_rate_xy(xy_mode mode, float dt, float ekfNavVelGainScaler, uint8_t marker_detected, float _curr_pos_x, float _curr_pos_y, float _curr_pos_z);
+    void _update_xy_controller(xy_mode mode, float ekfNavVelGainScaler, bool use_althold_lean_angle, uint8_t marker_detected, Vector3f _pos, Vector3f _vel);
+    void _pos_to_rate_xy(xy_mode mode, float dt, float ekfNavVelGainScaler, uint8_t marker_detected, Vector3f _pos);
 
     /// set_target_to_stopping_point_xy - sets horizontal target to reasonable stopping position in cm from home
     void set_target_to_stopping_point_xy();
@@ -366,7 +366,7 @@ private:
     /// rate_to_accel_xy - horizontal desired rate to desired acceleration
     ///    converts desired velocities in lat/lon directions to accelerations in lat/lon frame
     void rate_to_accel_xy(float dt, float ekfNavVelGainScaler);
-
+    void _rate_to_accel_xy(float dt, float ekfNavVelGainScaler, Vector3f _vel);
     /// accel_to_lean_angles - horizontal desired acceleration to lean angles
     ///    converts desired accelerations provided in lat/lon frame to roll/pitch angles
     void accel_to_lean_angles(float dt_xy, float ekfNavVelGainScaler, bool use_althold_lean_angle);

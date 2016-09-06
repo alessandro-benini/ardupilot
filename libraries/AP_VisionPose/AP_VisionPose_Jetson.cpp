@@ -14,6 +14,8 @@ extern const AP_HAL::HAL& hal;
 AP_Relay relay;
 
 float x_ned = 0.0f, y_ned = 0.0f, z_ned = 0.0f;
+float vx_ned = 0.0f, vy_ned = 0.0f, vz_ned = 0.0f;
+
 uint8_t prev_frame_number = 0;
 
 AP_VisionPose_Jetson::AP_VisionPose_Jetson(AP_VisionPose &_vision_pose, AP_VisionPose::VisionPose_State &_state, AP_HAL::UARTDriver *_port) :
@@ -126,7 +128,7 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 
 			jsmntok_t *g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			state.marker_detected = atoi(requested_data);
+			current_state.marker_detected = atoi(requested_data);
 
 			j = 1;
 			g = &t[i+j+2];
@@ -163,14 +165,34 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 			j = 5;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			current_state.attitude.x = atof(requested_data);
+			vx_ned = atof(requested_data);
 
 			j = 6;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
-			current_state.attitude.y = atof(requested_data);
+			vy_ned = atof(requested_data);
 
 			j = 7;
+			g = &t[i+j+2];
+			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+			vz_ned = atof(requested_data);
+
+			// Conversion from mm to cm.
+			current_state.velocity.x = vx_ned / 10.0f;
+			current_state.velocity.y = vy_ned / 10.0f;
+			current_state.velocity.z = vz_ned / 10.0f;
+
+			j = 8;
+			g = &t[i+j+2];
+			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+			current_state.attitude.x = atof(requested_data);
+
+			j = 9;
+			g = &t[i+j+2];
+			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
+			current_state.attitude.y = atof(requested_data);
+
+			j = 10;
 			g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
 			current_state.attitude.z = atof(requested_data);

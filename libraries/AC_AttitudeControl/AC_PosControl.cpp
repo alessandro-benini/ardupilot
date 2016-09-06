@@ -760,7 +760,7 @@ void AC_PosControl::update_xy_controller(xy_mode mode, float ekfNavVelGainScaler
     accel_to_lean_angles(dt, ekfNavVelGainScaler, use_althold_lean_angle);
 }
 
-void AC_PosControl::_update_xy_controller(xy_mode mode, float ekfNavVelGainScaler, bool use_althold_lean_angle, uint8_t marker_detected, float _curr_pos_x, float _curr_pos_y, float _curr_pos_z)
+void AC_PosControl::_update_xy_controller(xy_mode mode, float ekfNavVelGainScaler, bool use_althold_lean_angle, uint8_t marker_detected, Vector3f _pos, Vector3f _vel)
 {
     // compute dt
     uint32_t now = AP_HAL::millis();
@@ -779,10 +779,10 @@ void AC_PosControl::_update_xy_controller(xy_mode mode, float ekfNavVelGainScale
     // desired_vel_to_pos(dt);
 
     // run position controller's position error to desired velocity step
-    _pos_to_rate_xy(mode, dt, ekfNavVelGainScaler, marker_detected, _curr_pos_x, _curr_pos_y, _curr_pos_z);
+    _pos_to_rate_xy(mode, dt, ekfNavVelGainScaler, marker_detected, _pos);
 
     // run position controller's velocity to acceleration step
-    rate_to_accel_xy(dt, ekfNavVelGainScaler);
+    _rate_to_accel_xy(dt, ekfNavVelGainScaler, _vel);
 
     // run position controller's acceleration to lean angle step
     accel_to_lean_angles(dt, ekfNavVelGainScaler, use_althold_lean_angle);
@@ -1005,15 +1005,16 @@ void AC_PosControl::pos_to_rate_xy(xy_mode mode, float dt, float ekfNavVelGainSc
     }
 }
 
-void AC_PosControl::_pos_to_rate_xy(xy_mode mode, float dt, float ekfNavVelGainScaler, uint8_t marker_detected, float _curr_pos_x, float _curr_pos_y, float _curr_pos_z)
+void AC_PosControl::_pos_to_rate_xy(xy_mode mode, float dt, float ekfNavVelGainScaler, uint8_t marker_detected, Vector3f _pos)
 {
 	Vector3f curr_pos; //  = _inav.get_position();
 
 	// if(marker_detected == 1)
 	// {
-		curr_pos.x = _curr_pos_x;
-		curr_pos.y = _curr_pos_y;
-		curr_pos.z = _curr_pos_z;
+
+	curr_pos.x = _pos.x;
+	curr_pos.y = _pos.y;
+	curr_pos.z = _pos.z;
 
 		// hal.console->printf("M: %f %f\n",curr_pos.x,curr_pos.y);
 	// }
@@ -1023,8 +1024,6 @@ void AC_PosControl::_pos_to_rate_xy(xy_mode mode, float dt, float ekfNavVelGainS
 		// curr_pos.y = 0.0f;
 		// hal.console->printf("I: %f %f\n",curr_pos.x,curr_pos.y);
 	// }
-
-
 
     float linear_distance;      // the distance we swap between linear and sqrt velocity response
     float kP = ekfNavVelGainScaler * _p_pos_xy.kP(); // scale gains to compensate for noisy optical flow measurement in the EKF
@@ -1151,6 +1150,61 @@ void AC_PosControl::rate_to_accel_xy(float dt, float ekfNavVelGainScaler)
     _accel_target.y = _accel_feedforward.y + (vel_xy_p.y + vel_xy_i.y) * ekfNavVelGainScaler;
 }
 
+void AC_PosControl::_rate_to_accel_xy(float dt, float ekfNavVelGainScaler, Vector3f _vel)
+{
+    // const Vector3f &vel_curr = _inav.get_velocity();  // current velocity in cm/s
+
+    Vector3f vel_curr = _vel;
+
+    Vector2f vel_xy_p, vel_xy_i;
+
+    // reset last velocity target to current target
+    if (_flags.reset_rate_to_accel_xy) {
+        _vel_last.x = _vel_target.x;
+        _vel_last.y = _vel_target.y;
+        _flags.reset_rate_to_accel_xy = false;
+    }
+
+    // feed forward desired acceleration calculation
+    if (dt > 0.0f) {
+    	if (!_flags.freeze_ff_xy) {
+    		_accel_feedforward.x = (_vel_target.x - _vel_last.x)/dt;
+    		_accel_feedforward.y = (_vel_target.y - _vel_last.y)/dt;
+        } else {
+    		// stop the feed forward being calculated during a known discontinuity
+    		_flags.freeze_ff_xy = false;
+    	}
+    } else {
+    	_accel_feedforward.x = 0.0f;
+    	_accel_feedforward.y = 0.0f;
+    }
+
+    // store this iteration's velocities for the next iteration
+    _vel_last.x = _vel_target.x;
+    _vel_last.y = _vel_target.y;
+
+    // calculate velocity error
+    _vel_error.x = _vel_target.x - vel_curr.x;
+    _vel_error.y = _vel_target.y - vel_curr.y;
+
+    // call pi controller
+    _pi_vel_xy.set_input(_vel_error);
+
+    // get p
+    vel_xy_p = _pi_vel_xy.get_p();
+
+    // update i term if we have not hit the accel or throttle limits OR the i term will reduce
+    if ((!_limit.accel_xy && !_motors.limit.throttle_upper)) {
+        vel_xy_i = _pi_vel_xy.get_i();
+    } else {
+        vel_xy_i = _pi_vel_xy.get_i_shrink();
+    }
+
+    // combine feed forward accel with PID output from velocity error and scale PID output to compensate for optical flow measurement induced EKF noise
+    _accel_target.x = _accel_feedforward.x + (vel_xy_p.x + vel_xy_i.x) * ekfNavVelGainScaler;
+    _accel_target.y = _accel_feedforward.y + (vel_xy_p.y + vel_xy_i.y) * ekfNavVelGainScaler;
+}
+
 /// accel_to_lean_angles - horizontal desired acceleration to lean angles
 ///    converts desired accelerations provided in lat/lon frame to roll/pitch angles
 void AC_PosControl::accel_to_lean_angles(float dt, float ekfNavVelGainScaler, bool use_althold_lean_angle)
@@ -1209,7 +1263,7 @@ void AC_PosControl::accel_to_lean_angles(float dt, float ekfNavVelGainScaler, bo
     float cos_pitch_target = cosf(_pitch_target*M_PI/18000);
     _roll_target = constrain_float(atanf(accel_right*cos_pitch_target/(GRAVITY_MSS * 100))*(18000/M_PI), -lean_angle_max, lean_angle_max);
 
-    // hal.console->printf("Roll_Pitch: %f %f\n",_roll_target,_pitch_target);
+    hal.console->printf("Roll_Pitch: %f %f\n",_roll_target,_pitch_target);
 
 }
 

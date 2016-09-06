@@ -44,6 +44,7 @@ public:
     	int    frame_number;
 
     	Vector3f position;
+    	Vector3f velocity;
     	Vector3f attitude;
 
     	// Check if the measure is healthy (for example after CRC check)

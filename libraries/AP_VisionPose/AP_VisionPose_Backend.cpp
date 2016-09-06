@@ -22,7 +22,6 @@ AP_VisionPose_Backend::AP_VisionPose_Backend(AP_VisionPose &_vision_pose, AP_Vis
 
 void AP_VisionPose_Backend::setState(AP_VisionPose::VisionPose_State* _state)
 {
-	// I don't have any pointer inside the structure, so I can do bit-wise copy
 	pthread_mutex_lock(&visionpose_mutex);
 	state.frame_number = _state->frame_number;
 	state.healthy = _state->healthy;
@@ -31,6 +30,9 @@ void AP_VisionPose_Backend::setState(AP_VisionPose::VisionPose_State* _state)
 	state.marker_detected = _state->marker_detected;
 	state.position = _state->position;
 	state.attitude = _state->attitude;
+
+	// hal.console->printf("FN_set: %d\n",state.frame_number);
+
 	pthread_mutex_unlock(&visionpose_mutex);
 }
 
