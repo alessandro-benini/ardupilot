@@ -772,26 +772,39 @@ struct PACKED log_VisionPose_XY {
     uint64_t time_us;
     uint8_t marker;
     int frame_n;
-    float posX;
-    float posY;
+    // float posX;
+    // float posY;
     float posXNED;
     float posYNED;
+    float posZNED;
+    // float velX;
+    // float velY;
+    float velXNED;
+    float velYNED;
+    float velZNED;
     float roll;
     float pitch;
     float yaw_rad;
 };
 
-void Copter::Log_Write_VisionPose_XY(uint8_t _marker, int _frame_number, float _x, float _y, float _x_ned, float _y_ned, float _roll, float _pitch, float _yaw_rad)
+// void Copter::Log_Write_VisionPose_XY(uint8_t _marker, int _frame_number, Vector3f _pos_body, Vector3f _pos_ned, Vector3f _vel_body, Vector3f _vel_ned, float _roll, float _pitch, float _yaw_rad)
+void Copter::Log_Write_VisionPose_XY(uint8_t _marker, int _frame_number, Vector3f _pos_ned, Vector3f _vel_ned, float _roll, float _pitch, float _yaw_rad)
 {
     struct log_VisionPose_XY pkt = {
         LOG_PACKET_HEADER_INIT(LOG_VL_MSG_XY),
         time_us	: AP_HAL::micros64(),
         marker	: _marker,
         frame_n : _frame_number,
-        posX    : _x,
-        posY    : _y,
-        posXNED : _x_ned,
-        posYNED : _y_ned,
+        // posX    : _pos_body.x,
+        // posY    : _pos_body.y,
+        posXNED : _pos_ned.x,
+        posYNED : _pos_ned.y,
+        posZNED : _pos_ned.z,
+        // velX    : _vel_body.x,
+        // velY    : _vel_body.y,
+        velXNED : _vel_ned.x,
+        velYNED : _vel_ned.y,
+        velZNED : _vel_ned.z,
         roll    : _roll,
         pitch   : _pitch,
         yaw_rad : _yaw_rad
@@ -841,7 +854,7 @@ const struct LogStructure Copter::log_structure[] = {
       "GUID",  "QBffffff",    "TimeUS,Type,pX,pY,pZ,vX,vY,vZ" },
     { LOG_VISIONLANDING_MSG, sizeof(log_VisionPose), "VP", "QBiffffff", "TimeUS,marker,frameNumber,posX,posY,posZ,yaw,yawE,yawR"},
     { LOG_VL_MSG_AH, sizeof(log_VisionPose_AH), "VPAH", "QBif", "TimeUS,marker,frameNumber,posZ"},
-    { LOG_VL_MSG_XY, sizeof(log_VisionPose_XY), "VPXY", "QBifffffff", "TimeUS,marker,frameNumber,posX,posY,posXNED,posYNED,r,p,y"}
+    { LOG_VL_MSG_XY, sizeof(log_VisionPose_XY), "VPXY", "QBifffffffff", "TimeUS,marker,frameNumber,pX,pY,pZ,vX,vY,vZ,r,p,y"}
 };
 
 #if CLI_ENABLED == ENABLED

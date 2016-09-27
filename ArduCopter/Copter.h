@@ -692,7 +692,7 @@ private:
 #endif
     void Log_Write_VisionPose(uint8_t _marker, int _frame_number, float _x, float _y, float _z, float _yaw, float _yawE, float _yawR);
     void Log_Write_VisionPose_AH(uint8_t _marker, int _frame_number, float _z);
-    void Log_Write_VisionPose_XY(uint8_t _marker, int _frame_number, float _x, float _y, float _x_ned, float _y_ned, float _roll, float _pitch, float _yaw_rad);
+    void Log_Write_VisionPose_XY(uint8_t _marker, int _frame_number, Vector3f _pos_ned, Vector3f _vel_ned, float _roll, float _pitch, float _yaw_rad);
     void Log_Write_Precland();
     void Log_Write_GuidedTarget(uint8_t target_type, const Vector3f& pos_target, const Vector3f& vel_target);
     void Log_Write_Vehicle_Startup_Messages();

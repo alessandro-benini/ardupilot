@@ -29,10 +29,8 @@ void AP_VisionPose_Backend::setState(AP_VisionPose::VisionPose_State* _state)
 	state.last_update_usec = _state->last_update_usec;
 	state.marker_detected = _state->marker_detected;
 	state.position = _state->position;
+	state.velocity = _state->velocity;
 	state.attitude = _state->attitude;
-
-	// hal.console->printf("FN_set: %d\n",state.frame_number);
-
 	pthread_mutex_unlock(&visionpose_mutex);
 }
 

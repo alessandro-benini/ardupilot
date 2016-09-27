@@ -776,7 +776,7 @@ void AC_PosControl::_update_xy_controller(xy_mode mode, float ekfNavVelGainScale
     calc_leash_length_xy();
 
     // translate any adjustments from pilot to loiter target
-    // desired_vel_to_pos(dt);
+    desired_vel_to_pos(dt);
 
     // run position controller's position error to desired velocity step
     _pos_to_rate_xy(mode, dt, ekfNavVelGainScaler, marker_detected, _pos);
@@ -1200,6 +1200,13 @@ void AC_PosControl::_rate_to_accel_xy(float dt, float ekfNavVelGainScaler, Vecto
         vel_xy_i = _pi_vel_xy.get_i_shrink();
     }
 
+//    vel_xy_p.x = 1.10;
+//    vel_xy_p.y = 1.10;
+//    vel_xy_i.x = 0.25;
+//    vel_xy_i.y = 0.25;
+
+    // hal.console->printf("PI velocity: %f %f\n",_pi_vel_xy.getKP(), _pi_vel_xy.getKI());
+
     // combine feed forward accel with PID output from velocity error and scale PID output to compensate for optical flow measurement induced EKF noise
     _accel_target.x = _accel_feedforward.x + (vel_xy_p.x + vel_xy_i.x) * ekfNavVelGainScaler;
     _accel_target.y = _accel_feedforward.y + (vel_xy_p.y + vel_xy_i.y) * ekfNavVelGainScaler;
@@ -1262,8 +1269,6 @@ void AC_PosControl::accel_to_lean_angles(float dt, float ekfNavVelGainScaler, bo
     _pitch_target = constrain_float(atanf(-accel_forward/(GRAVITY_MSS * 100))*(18000/M_PI),-lean_angle_max, lean_angle_max);
     float cos_pitch_target = cosf(_pitch_target*M_PI/18000);
     _roll_target = constrain_float(atanf(accel_right*cos_pitch_target/(GRAVITY_MSS * 100))*(18000/M_PI), -lean_angle_max, lean_angle_max);
-
-    hal.console->printf("Roll_Pitch: %f %f\n",_roll_target,_pitch_target);
 
 }
 

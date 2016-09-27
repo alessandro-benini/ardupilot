@@ -55,44 +55,26 @@ bool Copter::vision_land_init(bool ignore_checks)
 void Copter::vision_land_run()
 {
 
-	float Kp = 0.1;
-
 	AP_VisionPose::VisionPose_State* current_state;
-	current_state = vision_pose.getState();
 
-    //float pos_error_x = 0.0f;
-    //float desired_position_x = 0.0f;
+    float max_angle = 175.0f; // 3 degrees
 
-    //float pos_error_y = 0.0f;
-    //float desired_position_y = 0.0f;
+	int frame_number;
+	int marker_detected;
+	float yaw_rad = 0.0f;
+	float target_roll = 0.0f, target_pitch = 0.0f;
 
-    //float pos_error_z = 0.0f;
-    //float desired_position_z = 100.0f;
-
-    float yaw = 0.0f;
-
-    float target_roll = 0.0f, target_pitch = 0.0f;
-
-    float target_yaw_rate = 0.0f;
-
-    float pilot_throttle_scaled = 0.0f;
-
-	float posX_cm = 0.0f, posY_cm = 0.0f;
-	float posX_cm_B = 0.0f, posY_cm_B = 0.0f;
-
-	float posZ_cm = 0.0f;
-
-	float posX_cm_NED, posY_cm_NED, posZ_cm_NED;
-	float pos_error_x_BODY, pos_error_y_BODY;
-
-	uint8_t marker_detected = 0;
-	int frame_number = 0;
-
-	float yaw_vision = 0.0f;
+	Vector3f position, velocity;
+	Vector3f position_NED, velocity_NED;
 
     // initialize vertical speeds and acceleration
     pos_control.set_speed_z(-g.pilot_velocity_z_max, g.pilot_velocity_z_max);
     pos_control.set_accel_z(g.pilot_accel_z);
+
+    current_state = vision_pose.getState();
+
+    frame_number = current_state->frame_number;
+    marker_detected = current_state->marker_detected;
 
     // if not armed set throttle to zero and exit immediately
     if (!motors.armed() || ap.throttle_zero || !motors.get_interlock()) {
@@ -105,46 +87,45 @@ void Copter::vision_land_run()
 
     motors.set_desired_spool_state(AP_Motors::DESIRED_THROTTLE_UNLIMITED);
 
-    // apply SIMPLE mode transform to pilot inputs
-    // update_simple_mode();
-
-    frame_number = current_state->frame_number;
-    marker_detected = current_state->marker_detected;
+    // hal.console->printf("Current State: %d %f %f %f %f \n", marker_detected, current_state->position.x, current_state->position.y, current_state->velocity.x, current_state->velocity.y);
 
     // posX_cm, posY_cm, posZ_cm are expressed in marker reference frame
+	position = current_state->position;
+	yaw_rad = ((float)ahrs.yaw_sensor/100.0)*3.1415/180.0f;
+
+	// If I detected the marker I updated the velocity
     if(marker_detected == 1)
-    {
-        posX_cm = current_state->position.x;
-        posY_cm = current_state->position.y;
-        posZ_cm = current_state->position.z;
-        yaw_vision = (current_state->attitude.z)*(3.1415/180.0f);
-
-    }
+    	velocity = current_state->velocity;
+    // Otherwise, for security, I set the velocity to zero.
     else
-    {
-        posX_cm = 0.0f;
-        posY_cm = 0.0f;
-        // posZ_cm = 0.0f;
-        // yaw_vision = 0.0f;
+    	velocity = Vector3f(0.0f,0.0f,0.0f);
+
+    position_NED.x = position.x*cos(yaw_rad)-position.y*sin(yaw_rad);
+    position_NED.y = position.x*sin(yaw_rad)+position.y*cos(yaw_rad);
+    position_NED.z = position.z;
+
+    velocity_NED.x = velocity.x*cos(yaw_rad)-velocity.y*sin(yaw_rad);
+    velocity_NED.y = velocity.x*sin(yaw_rad)+velocity.y*cos(yaw_rad);
+    velocity_NED.z = velocity.z;
+
+    float dt = pos_control.time_since_last_xy_update();
+
+    if (dt >= pos_control.get_dt_xy()) {
+    	pos_control._update_xy_controller(AC_PosControl::XY_MODE_POS_AND_VEL_FF, 1.0, false, marker_detected, position_NED, velocity_NED);
     }
 
-    // Calculate error on marker reference frame
-    //pos_error_x = desired_position_x - posX_cm;
-    //pos_error_y = desired_position_y - posY_cm;
+//    if(marker_detected == 1)
+//    {
+        target_roll  = pos_control.get_roll();
+        target_pitch = pos_control.get_pitch();
+//    }
+//    else
+//    {
+//        target_roll  = 0.0f;
+//        target_pitch = 0.0f;
+//    }
 
-    // Convert error to Body frame
-    posX_cm_B = posX_cm*cos(yaw_vision)+posY_cm*sin(yaw_vision);
-    posY_cm_B = -posX_cm*sin(yaw_vision)+posY_cm*cos(yaw_vision);
-
-    pos_error_x_BODY = 0.0 - posX_cm_B;
-    pos_error_y_BODY = 0.0 - posY_cm_B;
-
-    target_roll  = pos_error_y_BODY*Kp;
-    target_pitch = -pos_error_x_BODY*Kp;
-
-    // pilot_throttle_scaled = get_pilot_desired_throttle(channel_throttle->get_control_in());
-
-    float max_angle = 300.0;
+    // hal.console->printf("Roll_Pitch: %f %f %f %f %f %f\n",position.x, position.y, velocity.x, velocity.y, target_roll,target_pitch);
 
     if(target_roll > max_angle)
     	target_roll = max_angle;
@@ -157,26 +138,15 @@ void Copter::vision_land_run()
     	target_pitch  = -max_angle;
 
     if(marker_detected == 1)
-    	pos_control._update_z_controller(marker_detected, -posZ_cm);
+    	pos_control._update_z_controller(marker_detected, -position.z);
     else
     	pos_control.update_z_controller();
 
-    // hal.console->printf("RP: %f %f %f %f %f %f %f\n", posX_cm, posY_cm, posX_cm_B,posY_cm_B,target_roll,target_pitch,yaw_vision); // ,posZ_cm); // , pos_error_x_BODY, pos_error_y_BODY, target_roll, target_pitch);
-    // hal.console->printf("RP: %f %f %f %f %f %f %f\n", pos_error_x, pos_error_y,pos_error_x_BODY,pos_error_y_BODY,target_roll,target_pitch,posZ_cm); // , pos_error_x_BODY, pos_error_y_BODY, target_roll, target_pitch);
-
-    // attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw(pos_control.get_roll(), pos_control.get_pitch(), target_yaw_rate);
-    // attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw_smooth(target_roll, target_pitch, 0.0, get_smoothing_gain());
-    attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, 0.0); // , get_smoothing_gain());
-    // attitude_control.input_euler_angle_roll_pitch_yaw(target_roll,target_pitch,-900.0f,true);
-
-    // attitude_control.set_throttle_out(pilot_throttle_scaled, true, g.throttle_filt);
-
-    // CHECK THE SIGN OF X AND Y AS INPUT OF THE XY POSITION CONTROLLER
-    // CHECK IF SET_SPEED_Z AND SET_ACCEL_Z ARE STILL NECESSARY
+    attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw_smooth(target_roll, target_pitch, 0.0, get_smoothing_gain());
 
 	if(cnt%2==0)
 	{
-		Log_Write_VisionPose_XY(marker_detected, frame_number, posX_cm, posY_cm, posX_cm_B, posY_cm_B, target_roll, target_pitch, yaw);
+		Log_Write_VisionPose_XY(marker_detected, frame_number, position_NED, velocity_NED, target_roll, target_pitch, yaw_rad);
 		// Log_Write_VisionPose_AH(marker_detected, frame_number, posZ_cm);
 	}
 	cnt++;

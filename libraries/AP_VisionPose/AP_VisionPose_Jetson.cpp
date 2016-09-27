@@ -39,7 +39,7 @@ bool AP_VisionPose_Jetson::read(void)
 
 	numc = port->available();
 
-	char msg[90];
+	char msg[150];
 
 	char check = '\0';
 	int head = 0;
@@ -49,12 +49,32 @@ bool AP_VisionPose_Jetson::read(void)
 
 	double start = 0.0, end = 0.0;
 
+//	for (int16_t i = 0; i < numc; i++)
+//	{
+//		c = (char)port->read();
+//		if(c =='{')
+//		{
+//			idx = 0;
+//			msg[idx++] = '{';
+//		}
+//		else if(c=='}')
+//		{
+//			msg[idx] = '}';
+//			msg[++idx] = '\0';
+//
+//			hal.console->printf("String: %s\n",msg);
+//			if(decode_JSON(msg))
+//				parsed = true;
+//			msg[0] = '\0';
+//		}
+//		else
+//			msg[idx++] = c;
+//	}
+
 	for (int16_t i = 0; i < numc; i++)
 	{
 
 		c = (char)port->read();
-
-		// hal.console->print(c);
 
 		serial_buffer.push_back(c);
 		if (c == '{')
@@ -63,7 +83,9 @@ bool AP_VisionPose_Jetson::read(void)
 		}
 		if (c == '}')
 		{
+
 			// hal.console->print("\r\n");
+
 			int index = head - serial_buffer.get_head_position();
 			check = serial_buffer.peek(index);
 			if (check == '{')
@@ -95,7 +117,9 @@ bool AP_VisionPose_Jetson::read(void)
 
 bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 {
+
 	// hal.console->printf("Parsing %s\n",JSON_STRING); // : %s\n",JSON_STRING);
+
 	int i;
 	int r;
 	jsmn_parser p;
@@ -124,7 +148,7 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 				continue; /*  */
 			}
 
-			char requested_data[30];
+			char requested_data[50];
 
 			jsmntok_t *g = &t[i+j+2];
 			sprintf(requested_data, "%.*s", g->end - g->start, JSON_STRING + g->start);
@@ -201,6 +225,8 @@ bool AP_VisionPose_Jetson::decode_JSON(char JSON_STRING[])
 			current_state.last_update_usec = current_state.last_update_msec / 1000.0f;
 
 			i += t[i+1].size + 1;
+
+			// hal.console->printf("Parsing %f %f\n",current_state.position.x, current_state.position.y);
 
 			setState(&current_state);
 		}

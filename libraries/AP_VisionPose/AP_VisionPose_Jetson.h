@@ -26,6 +26,6 @@ public:
 
 	AP_VisionPose::VisionPose_State current_state;
 
-	AP_SerialBuffer<char,80> serial_buffer;
+	AP_SerialBuffer<char,120> serial_buffer;
 
 };

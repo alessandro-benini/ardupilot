@@ -57,6 +57,9 @@ public:
     float       filt_hz() const { return _filt_hz.get(); }
     float       get_filt_alpha() const { return _filt_alpha; }
 
+    float       getKP() { return _kp; }
+    float       getKI() { return _ki; }
+
     // set accessors
     void        kP(const float v) { _kp.set(v); }
     void        kI(const float v) { _ki.set(v); }
