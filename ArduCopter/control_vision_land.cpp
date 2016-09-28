@@ -4,7 +4,6 @@
 // while keeping the current altitude
 
 #include "Copter.h"
-
 /*
  * control_stabilize.pde - init and run calls for stabilize flight mode
  */
@@ -17,6 +16,14 @@ bool first_time = false;
 
 bool first_movement = true;
 uint32_t start_time = 0;
+
+int counter_for_landing = 0;
+int start_landing = 16000; // after 5 seconds of hovering, the landing procedure starts
+float th_error = 150.0; // 15 cms max error
+
+float z_setpoint = 150.0;
+
+Buzzer _buzzer;
 
 bool Copter::vision_land_init(bool ignore_checks)
 {
@@ -36,7 +43,7 @@ bool Copter::vision_land_init(bool ignore_checks)
     pos_control.calc_leash_length_z();
 
     // initialise position and desired velocity
-    pos_control.set_alt_target(150.0);
+    pos_control.set_alt_target(z_setpoint);
     pos_control.set_xy_target(0.0f,0.0f);
 
     // stop takeoff if running
@@ -90,13 +97,16 @@ void Copter::vision_land_run()
     // hal.console->printf("Current State: %d %f %f %f %f \n", marker_detected, current_state->position.x, current_state->position.y, current_state->velocity.x, current_state->velocity.y);
 
     // posX_cm, posY_cm, posZ_cm are expressed in marker reference frame
-	position = current_state->position;
-	yaw_rad = ((float)ahrs.yaw_sensor/100.0)*3.1415/180.0f;
+
 
 	// If I detected the marker I updated the velocity
     if(marker_detected == 1)
+    {
+    	position = current_state->position;
     	velocity = current_state->velocity;
+    	yaw_rad = ((float)ahrs.yaw_sensor/100.0)*3.1415/180.0f;
     // Otherwise, for security, I set the velocity to zero.
+    }
     else
     	velocity = Vector3f(0.0f,0.0f,0.0f);
 
@@ -127,22 +137,50 @@ void Copter::vision_land_run()
 
     // hal.console->printf("Roll_Pitch: %f %f %f %f %f %f\n",position.x, position.y, velocity.x, velocity.y, target_roll,target_pitch);
 
-    if(target_roll > max_angle)
-    	target_roll = max_angle;
-    if(target_roll < -max_angle)
-    	target_roll = -max_angle;
+//    if(target_roll > max_angle)
+//    	target_roll = max_angle;
+//    if(target_roll < -max_angle)
+//    	target_roll = -max_angle;
+//
+//    if(target_pitch > max_angle)
+//    	target_pitch = max_angle;
+//    if(target_pitch < -max_angle)
+//    	target_pitch  = -max_angle;
 
-    if(target_pitch > max_angle)
-    	target_pitch = max_angle;
-    if(target_pitch < -max_angle)
-    	target_pitch  = -max_angle;
-
-    if(marker_detected == 1)
+    if(marker_detected == 1 && position.z != 0)
     	pos_control._update_z_controller(marker_detected, -position.z);
     else
     	pos_control.update_z_controller();
 
     attitude_control.input_euler_angle_roll_pitch_euler_rate_yaw_smooth(target_roll, target_pitch, 0.0, get_smoothing_gain());
+
+    if(counter_for_landing < start_landing)
+    {
+        if(marker_detected == 1 && fabsf(position_NED.x) < th_error && fabsf(position_NED.y) < th_error)
+        {
+        	// hal.console->printf("PREPARING FOR LANDING %d\n",counter_for_landing);
+        	counter_for_landing += 1;
+        }
+        else
+        {
+        	counter_for_landing = 0;
+        	// hal.console->printf("NO LANDING %d\n",counter_for_landing);
+        }
+    }
+    else // if(counter_for_landing > start_landing) //  && (counter_for_landing % 20 == 0))
+    {
+    	_buzzer.AL();
+    	counter_for_landing += 1;
+    	if(fabsf(position_NED.z) > 50.0)
+    	{
+        	// hal.console->printf("LANDING %f\n",z_setpoint);
+        	if(z_setpoint > 0 && counter_for_landing % 20 == 0)
+        		z_setpoint -= 0.5;
+        	pos_control.set_alt_target(z_setpoint);
+    	}
+    	else
+    		pos_control.set_alt_target(0.0f);
+    }
 
 	if(cnt%2==0)
 	{

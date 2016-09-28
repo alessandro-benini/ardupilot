@@ -1145,6 +1145,10 @@ void AC_PosControl::rate_to_accel_xy(float dt, float ekfNavVelGainScaler)
         vel_xy_i = _pi_vel_xy.get_i_shrink();
     }
 
+    vel_xy_i.x = 0.2;
+    vel_xy_i.y = 0.2;
+
+
     // combine feed forward accel with PID output from velocity error and scale PID output to compensate for optical flow measurement induced EKF noise
     _accel_target.x = _accel_feedforward.x + (vel_xy_p.x + vel_xy_i.x) * ekfNavVelGainScaler;
     _accel_target.y = _accel_feedforward.y + (vel_xy_p.y + vel_xy_i.y) * ekfNavVelGainScaler;

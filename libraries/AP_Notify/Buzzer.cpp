@@ -196,6 +196,11 @@ void Buzzer::update()
     }
 }
 
+void Buzzer::AL()
+{
+	play_pattern(DOUBLE_BUZZ);
+}
+
 // on - turns the buzzer on or off
 void Buzzer::on(bool turn_on)
 {
