@@ -785,10 +785,11 @@ struct PACKED log_VisionPose_XY {
     float roll;
     float pitch;
     float yaw_rad;
+    float z_sp;
 };
 
 // void Copter::Log_Write_VisionPose_XY(uint8_t _marker, int _frame_number, Vector3f _pos_body, Vector3f _pos_ned, Vector3f _vel_body, Vector3f _vel_ned, float _roll, float _pitch, float _yaw_rad)
-void Copter::Log_Write_VisionPose_XY(uint8_t _marker, int _frame_number, Vector3f _pos_ned, Vector3f _vel_ned, float _roll, float _pitch, float _yaw_rad)
+void Copter::Log_Write_VisionPose_XY(uint8_t _marker, int _frame_number, Vector3f _pos_ned, Vector3f _vel_ned, float _roll, float _pitch, float _yaw_rad, float _z_sp)
 {
     struct log_VisionPose_XY pkt = {
         LOG_PACKET_HEADER_INIT(LOG_VL_MSG_XY),
@@ -807,7 +808,8 @@ void Copter::Log_Write_VisionPose_XY(uint8_t _marker, int _frame_number, Vector3
         velZNED : _vel_ned.z,
         roll    : _roll,
         pitch   : _pitch,
-        yaw_rad : _yaw_rad
+        yaw_rad : _yaw_rad,
+        z_sp	: _z_sp,
     };
     DataFlash.WriteBlock(&pkt, sizeof(pkt));
 }
@@ -854,7 +856,7 @@ const struct LogStructure Copter::log_structure[] = {
       "GUID",  "QBffffff",    "TimeUS,Type,pX,pY,pZ,vX,vY,vZ" },
     { LOG_VISIONLANDING_MSG, sizeof(log_VisionPose), "VP", "QBiffffff", "TimeUS,marker,frameNumber,posX,posY,posZ,yaw,yawE,yawR"},
     { LOG_VL_MSG_AH, sizeof(log_VisionPose_AH), "VPAH", "QBif", "TimeUS,marker,frameNumber,posZ"},
-    { LOG_VL_MSG_XY, sizeof(log_VisionPose_XY), "VPXY", "QBifffffffff", "TimeUS,marker,frameNumber,pX,pY,pZ,vX,vY,vZ,r,p,y"}
+    { LOG_VL_MSG_XY, sizeof(log_VisionPose_XY), "VPXY", "QBiffffffffff", "TimeUS,marker,frameNumber,pX,pY,pZ,vX,vY,vZ,r,p,y,zSP"}
 };
 
 #if CLI_ENABLED == ENABLED

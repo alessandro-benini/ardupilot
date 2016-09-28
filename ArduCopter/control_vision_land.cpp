@@ -18,7 +18,7 @@ bool first_movement = true;
 uint32_t start_time = 0;
 
 int counter_for_landing = 0;
-int start_landing = 16000; // after 5 seconds of hovering, the landing procedure starts
+int start_landing = 8000; // after 5 seconds of hovering, the landing procedure starts
 float th_error = 150.0; // 15 cms max error
 
 float z_setpoint = 150.0;
@@ -169,6 +169,7 @@ void Copter::vision_land_run()
     }
     else // if(counter_for_landing > start_landing) //  && (counter_for_landing % 20 == 0))
     {
+    	start_landing = 4000;
     	_buzzer.AL();
     	counter_for_landing += 1;
     	if(fabsf(position_NED.z) > 50.0)
@@ -179,12 +180,16 @@ void Copter::vision_land_run()
         	pos_control.set_alt_target(z_setpoint);
     	}
     	else
-    		pos_control.set_alt_target(0.0f);
+    	{
+    		z_setpoint = 0;
+    		pos_control.set_alt_target(-100.0);
+    	}
+
     }
 
 	if(cnt%2==0)
 	{
-		Log_Write_VisionPose_XY(marker_detected, frame_number, position_NED, velocity_NED, target_roll, target_pitch, yaw_rad);
+		Log_Write_VisionPose_XY(marker_detected, frame_number, position_NED, velocity_NED, target_roll, target_pitch, yaw_rad,z_setpoint);
 		// Log_Write_VisionPose_AH(marker_detected, frame_number, posZ_cm);
 	}
 	cnt++;
