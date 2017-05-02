@@ -252,6 +252,7 @@ bool Plane::verify_command(const AP_Mission::Mission_Command& cmd)        // Ret
             return landing.verify_abort_landing(prev_WP_loc, next_WP_loc, current_loc, auto_state.takeoff_altitude_rel_cm, throttle_suppressed);
 
         } else {
+
             // use rangefinder to correct if possible
             const float height = height_above_target() - rangefinder_correction();
             return landing.verify_land(prev_WP_loc, next_WP_loc, current_loc,
@@ -541,6 +542,35 @@ void Plane::do_land(const AP_Mission::Mission_Command& cmd)
     memset(&rangefinder_state, 0, sizeof(rangefinder_state));
 
     landing.do_land(cmd, relative_altitude);
+
+#ifndef LOG_GCS_MESSAGES_ONLY
+
+	// Here I restore the original version of the mission (in case it should be reloaded)
+	GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Restoring original mission");
+	AP_Mission::Mission_Command wp;
+	uint16_t num_commands = mission.num_commands();
+	GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Number of commands: %d",num_commands);
+	mission.get_next_nav_cmd(num_commands-1, wp);
+	uint16_t landing_wp_index = wp.index;
+	GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Landing WP index: %d",landing_wp_index);
+
+	// If the last command is the landing
+	if(wp.id==MAV_CMD_NAV_LAND)
+	{
+		// I remove the three previous commands (virtual waypoints)
+		uint16_t start = num_commands-4;
+		GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Truncate mission at index: %d",start);
+		mission.truncate(start);
+		GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Number of commands after truncate: %d",mission.num_commands());
+		GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Re-adding landing WP");
+		// then, I re-add the landing waypoint
+		mission.add_cmd(wp);
+		GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Number of commands after re-adding landing WP: %d",mission.num_commands());
+		// I update the mission
+		mission.update();
+	}
+
+#endif
 
 #if GEOFENCE_ENABLED == ENABLED 
     if (g.fence_autoenable == 1) {
