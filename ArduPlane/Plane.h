@@ -110,6 +110,8 @@
 #include "avoidance_adsb.h"
 #include "AP_Arming.h"
 
+// #define LOG_GCS_MESSAGES_ONLY
+
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
 #include <SITL/SITL.h>
 #endif
