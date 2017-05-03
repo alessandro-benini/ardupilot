@@ -1,6 +1,5 @@
 #include "Plane.h"
 
-
 bool flag = false;
 int flag_cnt = 1;
 
@@ -430,37 +429,36 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "LAST MISSION WP INFO: %4.11f,%4.11f,%4.11f",next_wp.content.location.lat/10000000.0f,next_wp.content.location.lng/10000000.0f,next_wp.content.location.alt/100.0);
 
 			// Default distance of VWP when there is no wind
-			float d = 1000.0f;
 			// Direction of the Wind (rad)
 			float thetaWind = 0.0f;
 			float new_theta_vwp = 0.0f;
 
 			thetaWind = atan2(windY,windX);
 			// New theta is the wind direction + 90 degrees
-			new_theta_vwp = thetaWind + 1.5707f;
+			new_theta_vwp = thetaWind + g.heading_wind*3.1415/180.0f;
 
 			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "WIND DIR: %f",thetaWind*180.0/3.1415);
 			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "OLD LANDING WP: %4.11f,%4.11f,%4.11f",lwp.lat/10000000.0f,lwp.lng/10000000.0f,lwp.alt/100.0);
 			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "VWPS DIRECTION (DEG): %f",new_theta_vwp*180.0/3.1415);
 
 			// Calculate the coordinates of the three virtual waypoints
-			loc_vwp1.lat = lwp.lat + (d*cos(new_theta_vwp)) / mdlat * 10000000.0f;
-			loc_vwp1.lng = lwp.lng + (d*sin(new_theta_vwp)) / mdlng * 10000000.0f;
+			loc_vwp1.lat = lwp.lat + (g.dist_vwp1*cos(new_theta_vwp)) / mdlat * 10000000.0f;
+			loc_vwp1.lng = lwp.lng + (g.dist_vwp1*sin(new_theta_vwp)) / mdlng * 10000000.0f;
 			// The altitude is the same as the altitude of the last waypoint mission
 			loc_vwp1.alt = next_wp.content.location.alt;
 			loc_vwp1.options = 1<<0;
 
 			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "VWP1: %4.11f,%4.11f,%4.11f",loc_vwp1.lat/10000000.0f,loc_vwp1.lng/10000000.0f,loc_vwp1.alt/100.0);
 
-			loc_vwp2.lat = lwp.lat + ((d+500)*cos(new_theta_vwp)) / mdlat * 10000000.0f;
-			loc_vwp2.lng = lwp.lng + ((d+500)*sin(new_theta_vwp)) / mdlng * 10000000.0f;
+			loc_vwp2.lat = lwp.lat + ((g.dist_vwp1+g.dist_incr)*cos(new_theta_vwp)) / mdlat * 10000000.0f;
+			loc_vwp2.lng = lwp.lng + ((g.dist_vwp1+g.dist_incr)*sin(new_theta_vwp)) / mdlng * 10000000.0f;
 			// The altitude is the same as the altitude of the last waypoint mission
 			loc_vwp2.alt = next_wp.content.location.alt;
 			loc_vwp2.options = 1<<0;
 			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "VWP2: %4.11f,%4.11f,%4.11f",loc_vwp2.lat/10000000.0f,loc_vwp2.lng/10000000.0f,loc_vwp2.alt/100.0);
 
-			loc_vwp3.lat = lwp.lat + ((d+1000)*cos(new_theta_vwp)) / mdlat * 10000000.0f;
-			loc_vwp3.lng = lwp.lng + ((d+1000)*sin(new_theta_vwp)) / mdlng * 10000000.0f;
+			loc_vwp3.lat = lwp.lat + ((g.dist_vwp1+2.0*g.dist_incr)*cos(new_theta_vwp)) / mdlat * 10000000.0f;
+			loc_vwp3.lng = lwp.lng + ((g.dist_vwp1+2.0*g.dist_incr)*sin(new_theta_vwp)) / mdlng * 10000000.0f;
 			// The altitude is the same as the altitude of the last waypoint mission
 			loc_vwp3.alt = next_wp.content.location.alt;
 			loc_vwp3.options = 1<<0;

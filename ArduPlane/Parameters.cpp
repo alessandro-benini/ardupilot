@@ -12,6 +12,35 @@
 #define GOBJECTN(v, pname, name, class) { AP_PARAM_GROUP, name, Parameters::k_param_ ## pname, (const void *)&plane.v, {group_info : class::var_info} }
 
 const AP_Param::Info Plane::var_info[] = {
+
+	// @Param: HEADING_WIND
+	// @DisplayName: Heading with respect to the wind direction
+	// @Description: Desc - Heading with respect to the wind direction
+	// @User: Standard
+	// @Units: Degrees
+	// @Range: 0 180
+	// @Increment: 1
+	GSCALAR(heading_wind,            "HEADING_WIND",     HEADING_WIND_DEFAULT),
+
+	// @Param: DIST_VWP1
+	// @DisplayName: Distance of VWP1 from landing WP
+	// @Description: Desc - Distance of VWP1 from landing WP
+	// @User: Standard
+	// @Units: Meters
+	// @Range: 20 500
+	// @Increment: 1
+	GSCALAR(dist_vwp1,            "DIST_VWP1",     DIST_WP1_DEFAULT),
+
+	// @Param: DIST_VWP2
+	// @DisplayName: Distance of VWP2 from landing WP
+	// @Description: Desc - Distance of VWP2 from landing VWP1
+	// @User: Standard
+	// @Units: Meters
+	// @Range: 20 500
+	// @Increment: 1
+	GSCALAR(dist_incr,            "DIST_INCR",     DIST_INCR_DEFAULT),
+
+
     // @Param: FORMAT_VERSION
     // @DisplayName: Eeprom format version number
     // @Description: This value is incremented when changes are made to the eeprom format

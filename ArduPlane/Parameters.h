@@ -347,10 +347,18 @@ public:
         k_param_mixing_offset,
         k_param_dspoiler_rud_rate,
 
+		k_param_heading_wind,
+		k_param_dist_vwp1,
+		k_param_dist_incr,
+
         k_param_DataFlash = 253, // Logging Group
 
         // 254,255: reserved
     };
+
+    AP_Float heading_wind;
+    AP_Float dist_vwp1;
+	AP_Float dist_incr;
 
     AP_Int16 format_version;
     AP_Int8 software_type;
