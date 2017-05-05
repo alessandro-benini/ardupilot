@@ -31,7 +31,7 @@ const AP_Param::Info Plane::var_info[] = {
 	// @Increment: 1
 	GSCALAR(dist_vwp1,            "DIST_VWP1",     DIST_WP1_DEFAULT),
 
-	// @Param: DIST_VWP2
+	// @Param: DIST_INCR
 	// @DisplayName: Distance of VWP2 from landing WP
 	// @Description: Desc - Distance of VWP2 from landing VWP1
 	// @User: Standard
@@ -39,7 +39,6 @@ const AP_Param::Info Plane::var_info[] = {
 	// @Range: 20 500
 	// @Increment: 1
 	GSCALAR(dist_incr,            "DIST_INCR",     DIST_INCR_DEFAULT),
-
 
     // @Param: FORMAT_VERSION
     // @DisplayName: Eeprom format version number

@@ -385,7 +385,7 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 	AP_Mission::Mission_Command wp;
 	mission.get_next_nav_cmd(cmd.index+2, wp);
 
-	GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "WP(%d),%d,%4.11f,%4.11f,%4.11f",cmd.index,cmd.index,cmd.content.location.lat/10000000.0f,cmd.content.location.lng/10000000.0f,cmd.content.location.alt/100.0);
+	gcs_send_text_fmt(MAV_SEVERITY_INFO,"WP(%d),%d,%10.6f,%10.6f,%8.3f",cmd.index,cmd.index,cmd.content.location.lat/10000000.0f,cmd.content.location.lng/10000000.0f,cmd.content.location.alt/100.0);
 
 	if(wp.id == MAV_CMD_NAV_LAND && !flag)
 	{
@@ -402,7 +402,7 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 		// windThreshold [m/s] is the minimum value to consider the wind influence
 		float windThreshold = 2.0f;
 
-		GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "WIND SPD: %f",modWind);
+		gcs_send_text_fmt(MAV_SEVERITY_INFO,"WIND_SPD:%5.2f",modWind);
 		// If the wind speed is higher than the threshold, I generate the virtual waypoints, otherwise I don't modify the mission
 		if(modWind > windThreshold)
 		{
@@ -415,8 +415,8 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 			float mdlat = 111132.954-559.822*cos(2*latr)+1.175*cos(4*latr);
 			float mdlng = 111132.954*cos(latr);
 
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "(LAT,LNG) (RAD):%f,%f",latr,lngr);
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "(LAT,LNG) (METERS):%f,%f",mdlat,mdlng);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"LLr:%12.4f,%12.4f",latr,lngr);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"LLm:%12.4f,%12.4f",mdlat,mdlng);
 
 			// Coordinates of the virtual waypoints
 			Location loc_vwp1, loc_vwp2, loc_vwp3;
@@ -426,7 +426,7 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 			AP_Mission::Mission_Command next_wp;
 			mission.get_next_nav_cmd(cmd.index+1, next_wp);
 
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "LAST MISSION WP INFO: %4.11f,%4.11f,%4.11f",next_wp.content.location.lat/10000000.0f,next_wp.content.location.lng/10000000.0f,next_wp.content.location.alt/100.0);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"LAST M_WP:%10.6f,%10.6f,%8.3f",next_wp.content.location.lat/10000000.0f,next_wp.content.location.lng/10000000.0f,next_wp.content.location.alt/100.0);
 
 			// Default distance of VWP when there is no wind
 			// Direction of the Wind (rad)
@@ -437,9 +437,9 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 			// New theta is the wind direction + 90 degrees
 			new_theta_vwp = thetaWind + g.heading_wind*3.1415/180.0f;
 
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "WIND DIR: %f",thetaWind*180.0/3.1415);
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "OLD LANDING WP: %4.11f,%4.11f,%4.11f",lwp.lat/10000000.0f,lwp.lng/10000000.0f,lwp.alt/100.0);
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "VWPS DIRECTION (DEG): %f",new_theta_vwp*180.0/3.1415);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"WIND_DIR:%f",thetaWind*180.0/3.1415);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"OLD L_WP:%10.6f,%10.6f,%8.3f",lwp.lat/10000000.0f,lwp.lng/10000000.0f,lwp.alt/100.0);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"VWPS_DIRd:%f",new_theta_vwp*180.0/3.1415);
 
 			// Calculate the coordinates of the three virtual waypoints
 			loc_vwp1.lat = lwp.lat + (g.dist_vwp1*cos(new_theta_vwp)) / mdlat * 10000000.0f;
@@ -448,32 +448,32 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 			loc_vwp1.alt = next_wp.content.location.alt;
 			loc_vwp1.options = 1<<0;
 
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "VWP1: %4.11f,%4.11f,%4.11f",loc_vwp1.lat/10000000.0f,loc_vwp1.lng/10000000.0f,loc_vwp1.alt/100.0);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"VWP1:%10.6f,%10.6f,%8.3f",loc_vwp1.lat/10000000.0f,loc_vwp1.lng/10000000.0f,loc_vwp1.alt/100.0);
 
 			loc_vwp2.lat = lwp.lat + ((g.dist_vwp1+g.dist_incr)*cos(new_theta_vwp)) / mdlat * 10000000.0f;
 			loc_vwp2.lng = lwp.lng + ((g.dist_vwp1+g.dist_incr)*sin(new_theta_vwp)) / mdlng * 10000000.0f;
 			// The altitude is the same as the altitude of the last waypoint mission
 			loc_vwp2.alt = next_wp.content.location.alt;
 			loc_vwp2.options = 1<<0;
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "VWP2: %4.11f,%4.11f,%4.11f",loc_vwp2.lat/10000000.0f,loc_vwp2.lng/10000000.0f,loc_vwp2.alt/100.0);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"VWP2:%10.6f,%10.6f,%8.3f",loc_vwp2.lat/10000000.0f,loc_vwp2.lng/10000000.0f,loc_vwp2.alt/100.0);
 
 			loc_vwp3.lat = lwp.lat + ((g.dist_vwp1+2.0*g.dist_incr)*cos(new_theta_vwp)) / mdlat * 10000000.0f;
 			loc_vwp3.lng = lwp.lng + ((g.dist_vwp1+2.0*g.dist_incr)*sin(new_theta_vwp)) / mdlng * 10000000.0f;
 			// The altitude is the same as the altitude of the last waypoint mission
 			loc_vwp3.alt = next_wp.content.location.alt;
 			loc_vwp3.options = 1<<0;
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "VWP3: %4.11f,%4.11f,%4.11f",loc_vwp3.lat/10000000.0f,loc_vwp3.lng/10000000.0f,loc_vwp3.alt/100.0);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"VWP3:%10.6f,%10.6f,%8.3f",loc_vwp3.lat/10000000.0f,loc_vwp3.lng/10000000.0f,loc_vwp3.alt/100.0);
+
+#ifdef USE_VWP
 
 			// Update the mission
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "[%d] - REWRITE MISSION",flag_cnt);
-
-#ifndef LOG_GCS_MESSAGES_ONLY
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"[%d]-REWRITE_M",flag_cnt);
 
 			// Remove the old landing waypoint
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "OLD LAND WP INDEX: %d",wp.index);
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Before truncate number of WPs: %d",mission.num_commands());
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"OLD L_WP IDX:%d",wp.index);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"Before truncate:%d",mission.num_commands());
 			mission.truncate(cmd.index+2);
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "After truncate number of WPs: %d",mission.num_commands());
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"After truncate:%d",mission.num_commands());
 
 			// Add the three virtual waypoints - The first VWP to be added is the farthest VWP
 
@@ -501,9 +501,9 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 			// For the moment the UAV will still land at the original landing waypoint
 			mission.add_cmd(wp);
 
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Before Update number of WPs: %d",mission.num_commands());
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"Before Update:%d",mission.num_commands());
 			mission.update();
-			GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "After Update number of WPs: %d",mission.num_commands());
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"After Update:%d",mission.num_commands());
 
 #endif
 
@@ -518,8 +518,8 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 void Plane::do_land(const AP_Mission::Mission_Command& cmd)
 {
 
-	GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "NEW LAND WP(%d),%d,%4.11f,%4.11f,%4.11f",cmd.index,cmd.index,cmd.content.location.lat/10000000.0f,cmd.content.location.lng/10000000.0f,cmd.content.location.alt/100.0);
-	GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "PERFORM LAND WP ID: %d",cmd.index);
+	gcs_send_text_fmt(MAV_SEVERITY_INFO,"NEW L_WP(%d),%d,%10.6f,%10.6f,%8.3f",cmd.index,cmd.index,cmd.content.location.lat/10000000.0f,cmd.content.location.lng/10000000.0f,cmd.content.location.alt/100.0);
+	gcs_send_text_fmt(MAV_SEVERITY_INFO,"L_WP ID:%d",cmd.index);
 
     set_next_WP(cmd.content.location);
 
@@ -541,29 +541,29 @@ void Plane::do_land(const AP_Mission::Mission_Command& cmd)
 
     landing.do_land(cmd, relative_altitude);
 
-#ifndef LOG_GCS_MESSAGES_ONLY
+#ifdef USE_VWP
 
 	// Here I restore the original version of the mission (in case it should be reloaded)
-	GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Restoring original mission");
+    gcs_send_text_fmt(MAV_SEVERITY_INFO,"Restoring original mission");
 	AP_Mission::Mission_Command wp;
 	uint16_t num_commands = mission.num_commands();
-	GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Number of commands: %d",num_commands);
+	gcs_send_text_fmt(MAV_SEVERITY_INFO,"Num commands: %d",num_commands);
 	mission.get_next_nav_cmd(num_commands-1, wp);
 	uint16_t landing_wp_index = wp.index;
-	GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Landing WP index: %d",landing_wp_index);
+	gcs_send_text_fmt(MAV_SEVERITY_INFO,"L_WP IDX:%d",landing_wp_index);
 
 	// If the last command is the landing
 	if(wp.id==MAV_CMD_NAV_LAND)
 	{
 		// I remove the three previous commands (virtual waypoints)
 		uint16_t start = num_commands-4;
-		GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Truncate mission at index: %d",start);
+		gcs_send_text_fmt(MAV_SEVERITY_INFO,"Truncate mission IDX:%d",start);
 		mission.truncate(start);
-		GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Number of commands after truncate: %d",mission.num_commands());
-		GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Re-adding landing WP");
+		gcs_send_text_fmt(MAV_SEVERITY_INFO,"Num comm after truncate:%d",mission.num_commands());
+		gcs_send_text_fmt(MAV_SEVERITY_INFO,"Re-adding landing WP");
 		// then, I re-add the landing waypoint
 		mission.add_cmd(wp);
-		GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Number of commands after re-adding landing WP: %d",mission.num_commands());
+		gcs_send_text_fmt(MAV_SEVERITY_INFO,"Num comm after re-adding L_WP: %d",mission.num_commands());
 		// I update the mission
 		mission.update();
 	}
