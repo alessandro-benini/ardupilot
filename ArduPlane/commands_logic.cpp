@@ -448,21 +448,21 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 			loc_vwp1.alt = next_wp.content.location.alt;
 			loc_vwp1.options = 1<<0;
 
-			gcs_send_text_fmt(MAV_SEVERITY_INFO,"VWP1:%10.6f,%10.6f,%8.3f",loc_vwp1.lat/10000000.0f,loc_vwp1.lng/10000000.0f,loc_vwp1.alt/100.0);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"VWP1:%f,%f,%f",loc_vwp1.lat/10000000.0f,loc_vwp1.lng/10000000.0f,loc_vwp1.alt/100.0);
 
 			loc_vwp2.lat = lwp.lat + ((g.dist_vwp1+g.dist_incr)*cos(new_theta_vwp)) / mdlat * 10000000.0f;
 			loc_vwp2.lng = lwp.lng + ((g.dist_vwp1+g.dist_incr)*sin(new_theta_vwp)) / mdlng * 10000000.0f;
 			// The altitude is the same as the altitude of the last waypoint mission
 			loc_vwp2.alt = next_wp.content.location.alt;
 			loc_vwp2.options = 1<<0;
-			gcs_send_text_fmt(MAV_SEVERITY_INFO,"VWP2:%10.6f,%10.6f,%8.3f",loc_vwp2.lat/10000000.0f,loc_vwp2.lng/10000000.0f,loc_vwp2.alt/100.0);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"VWP2:%f,%f,%f",loc_vwp2.lat/10000000.0f,loc_vwp2.lng/10000000.0f,loc_vwp2.alt/100.0);
 
 			loc_vwp3.lat = lwp.lat + ((g.dist_vwp1+2.0*g.dist_incr)*cos(new_theta_vwp)) / mdlat * 10000000.0f;
 			loc_vwp3.lng = lwp.lng + ((g.dist_vwp1+2.0*g.dist_incr)*sin(new_theta_vwp)) / mdlng * 10000000.0f;
 			// The altitude is the same as the altitude of the last waypoint mission
 			loc_vwp3.alt = next_wp.content.location.alt;
 			loc_vwp3.options = 1<<0;
-			gcs_send_text_fmt(MAV_SEVERITY_INFO,"VWP3:%10.6f,%10.6f,%8.3f",loc_vwp3.lat/10000000.0f,loc_vwp3.lng/10000000.0f,loc_vwp3.alt/100.0);
+			gcs_send_text_fmt(MAV_SEVERITY_INFO,"VWP3:%f,%f,%f",loc_vwp3.lat/10000000.0f,loc_vwp3.lng/10000000.0f,loc_vwp3.alt/100.0);
 
 #ifdef USE_VWP
 
@@ -501,9 +501,9 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 			// For the moment the UAV will still land at the original landing waypoint
 			mission.add_cmd(wp);
 
-			gcs_send_text_fmt(MAV_SEVERITY_INFO,"Before Update:%d",mission.num_commands());
-			mission.update();
-			gcs_send_text_fmt(MAV_SEVERITY_INFO,"After Update:%d",mission.num_commands());
+			//gcs_send_text_fmt(MAV_SEVERITY_INFO,"Before Update:%d",mission.num_commands());
+			//mission.update();
+			//gcs_send_text_fmt(MAV_SEVERITY_INFO,"After Update:%d",mission.num_commands());
 
 #endif
 
@@ -565,7 +565,7 @@ void Plane::do_land(const AP_Mission::Mission_Command& cmd)
 		mission.add_cmd(wp);
 		gcs_send_text_fmt(MAV_SEVERITY_INFO,"Num comm after re-adding L_WP: %d",mission.num_commands());
 		// I update the mission
-		mission.update();
+		//mission.update();
 	}
 
 #endif

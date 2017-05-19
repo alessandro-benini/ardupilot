@@ -116,6 +116,8 @@
 #include <SITL/SITL.h>
 #endif
 
+#define USE_VWP
+
 /*
   a plane specific AP_AdvancedFailsafe class
  */
