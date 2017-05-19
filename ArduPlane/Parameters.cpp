@@ -13,32 +13,41 @@
 
 const AP_Param::Info Plane::var_info[] = {
 
-	// @Param: HEADING_WIND
-	// @DisplayName: Heading with respect to the wind direction
-	// @Description: Desc - Heading with respect to the wind direction
+	// @Param: VWP_ENABLE
+	// @DisplayName: Enabling virtual waypoint feature
+	// @Description: This parameter allows to enable/disable the virtual waypoint feature. By default this feature is disabled.
 	// @User: Standard
-	// @Units: Degrees
-	// @Range: 0 180
+	// @Units: Boolean
+	// @Range: 0 1
 	// @Increment: 1
-	GSCALAR(heading_wind,            "HEADING_WIND",     HEADING_WIND_DEFAULT),
+	GSCALAR(vwp_enabled,            "VWP_ENABLE",     VWP_ENABLE_DEFAULT),
 
-	// @Param: DIST_VWP1
-	// @DisplayName: Distance of VWP1 from landing WP
-	// @Description: Desc - Distance of VWP1 from landing WP
-	// @User: Standard
-	// @Units: Meters
-	// @Range: 20 500
-	// @Increment: 1
-	GSCALAR(dist_vwp1,            "DIST_VWP1",     DIST_WP1_DEFAULT),
+    // @Param: HEADING_WIND
+    // @DisplayName: Heading with respect to the wind direction
+    // @Description: Desc - Heading with respect to the wind direction
+    // @User: Standard
+    // @Units: Degrees
+    // @Range: 0 180
+    // @Increment: 1
+    GSCALAR(heading_wind,            "VWP_HEADING_WIND",     HEADING_WIND_DEFAULT),
 
-	// @Param: DIST_INCR
-	// @DisplayName: Distance of VWP2 from landing WP
-	// @Description: Desc - Distance of VWP2 from landing VWP1
-	// @User: Standard
-	// @Units: Meters
-	// @Range: 20 500
-	// @Increment: 1
-	GSCALAR(dist_incr,            "DIST_INCR",     DIST_INCR_DEFAULT),
+    // @Param: DIST_VWP1
+    // @DisplayName: Distance of VWP1 from landing WP
+    // @Description: Desc - Distance of VWP1 from landing WP
+    // @User: Standard
+    // @Units: Meters
+    // @Range: 20 500
+    // @Increment: 1
+    GSCALAR(dist_vwp1,            "VWP_DIST_VWP1",     DIST_WP1_DEFAULT),
+
+    // @Param: DIST_INCR
+    // @DisplayName: Distance of VWP2 from landing WP
+    // @Description: Desc - Distance of VWP2 from landing VWP1
+    // @User: Standard
+    // @Units: Meters
+    // @Range: 20 500
+    // @Increment: 1
+    GSCALAR(dist_incr,            "VWP_DIST_INCR",     DIST_INCR_DEFAULT),
 
     // @Param: FORMAT_VERSION
     // @DisplayName: Eeprom format version number

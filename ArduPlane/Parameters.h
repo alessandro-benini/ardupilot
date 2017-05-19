@@ -53,6 +53,7 @@ public:
         k_param_avoidance_adsb,
         k_param_landing,
         k_param_NavEKF3,
+		k_param_vwp_enabled,
 
         // Misc
         //
@@ -358,7 +359,8 @@ public:
 
     AP_Float heading_wind;
     AP_Float dist_vwp1;
-	AP_Float dist_incr;
+    AP_Float dist_incr;
+    AP_Int8  vwp_enabled;
 
     AP_Int16 format_version;
     AP_Int8 software_type;
