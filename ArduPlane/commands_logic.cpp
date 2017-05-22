@@ -400,7 +400,6 @@ void Plane::generateVirtualWaypoints(const AP_Mission::Mission_Command& cmd)
     mission.get_next_nav_cmd(cmd.index+vwp_cfg.dist_lwp_idx, wp);
 
     GCS_SEND_MSG("WP(%d),%d,%10.6f,%10.6f,%8.3f",cmd.index,cmd.index,cmd.content.location.lat*TO_DEG_FORMAT,cmd.content.location.lng*TO_DEG_FORMAT,cmd.content.location.alt/100.0f);
-    GCS_SEND_MSG("@OK@%d",1);
 
     if(wp.id == MAV_CMD_NAV_LAND && !vwp_status.vwp_generated)
     {
