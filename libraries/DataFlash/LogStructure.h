@@ -1213,6 +1213,7 @@ enum LogMessages {
     LOG_VISUALODOM_MSG,
     LOG_AOA_SSA_MSG,
     LOG_BEACON_MSG,
+	LOG_VWP_MSG
 };
 
 enum LogOriginType {

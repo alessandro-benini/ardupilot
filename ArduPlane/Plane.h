@@ -116,8 +116,6 @@
 #include <SITL/SITL.h>
 #endif
 
-#define USE_VWP
-
 /*
   a plane specific AP_AdvancedFailsafe class
  */
@@ -790,6 +788,36 @@ private:
 
     static const struct LogStructure log_structure[];
     
+    typedef struct {
+      // The following variable set the point in the mission where the virtual waypoints are generated
+      int16_t dist_lwp_idx;
+      // Index for the first virtual waypoint (this is used for logging)
+      int16_t first_vwp_idx;
+      // Number of virtual waypoints
+      int16_t num_vpw;
+    } vwp_config_t;
+
+    typedef struct {
+      // The following variable checks if the virtual waypoints have been generated
+      bool vwp_generated;
+      // This flag is set to true when the mission is modified
+      bool mission_rewrote;
+      // This flag is set to true when the mission is restored
+      bool mission_restored;
+    } vwp_status_t;
+
+    vwp_config_t vwp_cfg = {
+      .dist_lwp_idx = 2,
+      .first_vwp_idx = 100,
+      .num_vpw = 3
+    };
+
+    vwp_status_t vwp_status = {
+      .vwp_generated = false,
+      .mission_rewrote = false,
+      .mission_restored = false
+    };
+
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
     // the crc of the last created PX4Mixer
     int32_t last_mixer_crc = -1;
@@ -1067,7 +1095,9 @@ private:
     bool start_command(const AP_Mission::Mission_Command& cmd);
     bool verify_command(const AP_Mission::Mission_Command& cmd);
     void do_takeoff(const AP_Mission::Mission_Command& cmd);
+    void generateVirtualWaypoints(const AP_Mission::Mission_Command& cmd);
     void do_nav_wp(const AP_Mission::Mission_Command& cmd);
+    void restoreMission();
     void do_land(const AP_Mission::Mission_Command& cmd);
     void loiter_set_direction_wp(const AP_Mission::Mission_Command& cmd);
     void do_loiter_unlimited(const AP_Mission::Mission_Command& cmd);
@@ -1106,6 +1136,8 @@ private:
     // support for AP_Avoidance custom flight mode, AVOID_ADSB
     bool avoid_adsb_init(bool ignore_checks);
     void avoid_adsb_run();
+
+    void Log_Write_VWP(int _mid, float _lat, float _lon, float _alt, int _isvwp);
 
 public:
     void mavlink_delay_cb();
