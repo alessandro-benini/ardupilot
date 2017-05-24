@@ -3,7 +3,7 @@
  *
  *       AHRS system using DCM matrices
  *
- *       Based on DCM code by Doug Weibel, Jordi Muñoz and Jose Julio. DIYDrones.com
+ *       Based on DCM code by Doug Weibel, Jordi Muï¿½oz and Jose Julio. DIYDrones.com
  *
  *       Adapted for the general ArduPilot AHRS interface by Andrew Tridgell
 
@@ -277,7 +277,7 @@ AP_AHRS_DCM::renorm(Vector3f const &a, Vector3f &result)
  *  to approximations rather than identities. In effect, the axes in the two frames of reference no
  *  longer describe a rigid body. Fortunately, numerical error accumulates very slowly, so it is a
  *  simple matter to stay ahead of it.
- *  We call the process of enforcing the orthogonality conditions ÒrenormalizationÓ.
+ *  We call the process of enforcing the orthogonality conditions ï¿½renormalizationï¿½.
  */
 void
 AP_AHRS_DCM::normalize(void)
@@ -940,7 +940,10 @@ void AP_AHRS_DCM::estimate_wind(void)
     }
 }
 
-
+float AP_AHRS_DCM::getLastGNDSpeed()
+{
+	return sqrtf(powf(_last_velocity.x,2.0f)+powf(_last_velocity.y,2.0f));
+}
 
 // calculate the euler angles and DCM matrix which will be used for high level
 // navigation control. Apply trim such that a positive trim value results in a

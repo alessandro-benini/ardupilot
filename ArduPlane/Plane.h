@@ -809,7 +809,7 @@ private:
     vwp_config_t vwp_cfg = {
       .dist_lwp_idx = 2,
       .first_vwp_idx = 100,
-      .num_vpw = 3
+      .num_vpw = 4
     };
 
     vwp_status_t vwp_status = {

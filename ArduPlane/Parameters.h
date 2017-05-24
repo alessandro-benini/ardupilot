@@ -54,6 +54,7 @@ public:
         k_param_landing,
         k_param_NavEKF3,
 		k_param_vwp_enabled,
+		k_param_heading_wind,
 
         // Misc
         //
@@ -69,7 +70,8 @@ public:
         k_param_flap_2_percent,
         k_param_flap_2_speed,
         k_param_reset_switch_chan,
-        k_param_manual_level, // unused
+        // k_param_manual_level, // unused
+		k_param_vwp_spd,
         k_param_land_pitch_cd,  // unused - moved to AP_Landing
         k_param_ins_old,            // *** Deprecated, remove with next eeprom number change
         k_param_stick_mixing,
@@ -348,19 +350,21 @@ public:
         k_param_mixing_offset,
         k_param_dspoiler_rud_rate,
 
-		k_param_heading_wind,
-		k_param_dist_vwp1,
-		k_param_dist_incr,
+		k_param_dist_vwpl_1,
+		k_param_dist_vwp1_2,
+		k_param_dist_vwp2_3,
 
         k_param_DataFlash = 253, // Logging Group
 
         // 254,255: reserved
     };
 
-    AP_Float heading_wind;
-    AP_Float dist_vwp1;
-    AP_Float dist_incr;
     AP_Int8  vwp_enabled;
+    AP_Float heading_wind;
+    AP_Float dist_vwpl_1;
+    AP_Float dist_vwp1_2;
+    AP_Float dist_vwp2_3;
+    AP_Float vwp_spd;
 
     AP_Int16 format_version;
     AP_Int8 software_type;

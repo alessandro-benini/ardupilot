@@ -117,6 +117,9 @@ public:
     // time that the AHRS has been up
     uint32_t uptime_ms() const override;
 
+    // Get the last estimation of the Ground Speed Velocity
+    float getLastGNDSpeed();
+
 private:
     float _ki;
     float _ki_yaw;
