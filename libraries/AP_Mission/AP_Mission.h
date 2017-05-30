@@ -351,6 +351,19 @@ public:
     /// get_current_nav_cmd - returns the current "navigation" command
     const Mission_Command& get_current_nav_cmd() const { return _nav_cmd; }
 
+    /// calc_index_last_mission_waypoint - returns the index of the last mission waypoint.
+    int16_t get_index_last_nav_WP();
+
+    /// calc_index_landing_WP - returns the index of the landing waypoint. The landing waypoint
+    /// should always be the last item. But this function is implemented in order to contemplate
+    /// the case where further actions are programmed after the landing and/or to make sure that
+    /// a landing waypoint is set.
+    int16_t get_index_landing_WP();
+
+    /// indexForVWPGeneration - return the index of the nav cmd item after which the vwp will be generated (referred to as CMD_VWP)
+    /// returns 0 if the mission is shorter than the distance between landing waypoint and CMD_VWP
+    int16_t get_index_for_VWP_generation(int16_t n);
+
     /// get_current_nav_index - returns the current "navigation" command index
     /// Note that this will return 0 if there is no command. This is
     /// used in MAVLink reporting of the mission command
