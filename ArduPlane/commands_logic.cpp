@@ -544,7 +544,7 @@ void Plane::generate_virtual_waypoints(const AP_Mission::Mission_Command& cmd)
 
 		// Avoid division by zero
 		if(vwp_cfg.num_vwp-1 > 0)
-			step = altitude_diff / vwp_cfg.num_vwp-1;
+			step = altitude_diff / (vwp_cfg.num_vwp-1);
 
 		// Sanity check: I make sure that the altitude of each virtual waypoint is within
 		// the specified range
