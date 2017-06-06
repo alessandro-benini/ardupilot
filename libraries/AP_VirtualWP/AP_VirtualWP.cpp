@@ -14,56 +14,56 @@ const AP_Param::GroupInfo VirtualWP::var_info[] = {
 	// @Param: VWP_ENABLE
 	// @DisplayName: Enabling virtual waypoint feature
 	// @Description: This parameter allows to enable/disable the virtual waypoint feature. By default this feature is disabled.
-	// @User: Advanced
+	// @User: Standard
 	// @Units: Boolean
 	// @Range: 0 1
 	// @Increment: 1
-	AP_GROUPINFO("VWP_ENABLE", 1, VirtualWP, vwp_enabled, VWP_ENABLE_DEFAULT),
+	AP_GROUPINFO("ENABLE", 1, VirtualWP, vwp_enabled, 0),
 
     // @Param: HEADING_WIND
     // @DisplayName: Heading with respect to the wind direction
     // @Description: Heading with respect to the wind direction
-    // @User: Advanced
+    // @User: Standard
     // @Units: Degrees
     // @Range: 0 180
     // @Increment: 1
-	AP_GROUPINFO("VWP_HEADING_WIND", 2, VirtualWP, heading_wind, VWP_HEADING_WIND_DEFAULT),
+	AP_GROUPINFO("HDG_WIND", 2, VirtualWP, heading_wind, 0.0),
 
     // @Param: VWP SPEED
     // @DisplayName: Virtual Waypoint Speed
     // @Description: Ths parameter allows to set the airspeed of the UAV during the navigation through the virtual waypoints.
-    // @User: Advanced
+    // @User: Standard
     // @Units: m/s
     // @Range: 15 30
     // @Increment: 1
-	AP_GROUPINFO("VWP_SPD", 3, VirtualWP, vwp_spd, VWP_SPD_DEFAULT),
+	AP_GROUPINFO("SPD", 3, VirtualWP, vwp_spd, 20.0),
 
     // @Param: DIST_VWP1
     // @DisplayName: Distance of VWP1 from landing WP
     // @Description: Desc - Distance of VWP1 from landing WP
-    // @User: Advanced
+    // @User: Standard
     // @Units: m
     // @Range: 20 500
     // @Increment: 1
-	AP_GROUPINFO("VWP_DIST_L_1", 4, VirtualWP, dist_vwpl_1, VWP_DIST_WP1_DEFAULT),
+	AP_GROUPINFO("DIST_L_1", 4, VirtualWP, dist_vwpl_1, 50.0),
 
     // @Param: DIST_INCR
     // @DisplayName: Distance of VWP2 from landing WP
     // @Description: Desc - Distance of VWP2 from landing VWP1
-    // @User: Advanced
+    // @User: Standard
     // @Units: m
     // @Range: 20 500
     // @Increment: 1
-	AP_GROUPINFO("VWP_DIST_1_2", 5, VirtualWP, dist_vwp1_2, VWP_DIST_1_2_DEFAULT),
+	AP_GROUPINFO("DIST_1_2", 5, VirtualWP, dist_vwp1_2, 50.0),
 
     // @Param: DIST_INCR
     // @DisplayName: Distance of VWP2 from landing WP
     // @Description: Desc - Distance of VWP2 from landing VWP1
-    // @User: Advanced
+    // @User: Standard
     // @Units: m
     // @Range: 20 500
     // @Increment: 1
-	AP_GROUPINFO("VWP_DIST_2_3", 6, VirtualWP, dist_vwp2_3, VWP_DIST_2_3_DEFAULT),
+	AP_GROUPINFO("DIST_2_3", 6, VirtualWP, dist_vwp2_3, 55.0),
 
     AP_GROUPEND
 

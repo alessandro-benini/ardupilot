@@ -114,10 +114,10 @@
 #include <SITL/SITL.h>
 #endif
 
-#define MSG_WINGBOYS
+#define WINGBOYS
 #define TEST_WINGBOYS
 
-#ifdef MSG_WINGBOYS
+#ifdef WINGBOYS
 #include <AP_VirtualWP/AP_VirtualWP.h>
 #endif
 
@@ -793,7 +793,7 @@ private:
 
     static const struct LogStructure log_structure[];
 
-#ifdef MSG_WINGBOYS
+#ifdef WINGBOYS
     VirtualWP virtual_wp{mission,ahrs};
 #endif
 

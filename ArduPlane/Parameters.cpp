@@ -1177,6 +1177,12 @@ const AP_Param::Info Plane::var_info[] = {
     // @Path: ../libraries/AP_Landing/AP_Landing.cpp
     GOBJECT(landing, "LAND_", AP_Landing),
 
+#ifdef WINGBOYS
+    // @Group: VWP_
+    // @Path: ../libraries/AP_VirtualWP/AP_VirtualWP.cpp
+    GOBJECT(virtual_wp, "VWP_", VirtualWP),
+#endif
+
     AP_VAREND
 };
 
