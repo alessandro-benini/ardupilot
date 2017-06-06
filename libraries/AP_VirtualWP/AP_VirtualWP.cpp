@@ -76,15 +76,15 @@ VirtualWP::VirtualWP(AP_Mission &mission, AP_AHRS_NavEKF &ahrs):
 	_mission(mission),
 	_ahrs(ahrs),
 	vwp_cfg{2,4}
+{}
+
+void VirtualWP::init_VWP(void)
 {
 	num_cmd = _mission.num_commands();
 	idx_landing_wp = -1;
 	idx_last_mission_wp = -1;
 	idx_vwp = 0;
-}
 
-void VirtualWP::init_VWP(void)
-{
 	calc_index_landing_waypoint();
 	calc_index_last_mission_waypoint();
 	calc_index_virtual_waypoints();
@@ -92,6 +92,9 @@ void VirtualWP::init_VWP(void)
 
 void VirtualWP::calc_index_landing_waypoint(void)
 {
+
+    // Command item used for iterating through the mission
+    AP_Mission::Mission_Command current_cmd;
 
 	// Start iterating from the end of the mission
 	for(int16_t i=num_cmd-1; i>=0; i--)
@@ -118,6 +121,9 @@ void VirtualWP::calc_index_landing_waypoint(void)
 void VirtualWP::calc_index_last_mission_waypoint(void)
 {
 
+    // Command item used for iterating through the mission
+    AP_Mission::Mission_Command current_cmd;
+
 	// Start iterating from the end of the mission, looking for the n-th last DO_NAV waypoint.
 	for(int16_t i=num_cmd-1; i>=0; i--)
 	{
@@ -140,6 +146,9 @@ void VirtualWP::calc_index_last_mission_waypoint(void)
 
 void VirtualWP::calc_index_virtual_waypoints()
 {
+
+    // Command item used for iterating through the mission
+    AP_Mission::Mission_Command current_cmd;
 
 	int16_t n = vwp_cfg.dist_lwp_idx;
 
@@ -384,8 +393,18 @@ void VirtualWP::generate_virtual_waypoints(const AP_Mission::Mission_Command& cm
 
     	// I set the state to VWP_GENERATED
     	vwp_status = VWP_GENERATED;
+
+    	update_num_commands();
+
     }
 
+}
+
+void VirtualWP::update_num_commands()
+{
+	// num_cmd is updated with the total number of commands after adding the virtual waypoints
+	if(vwp_status > VWP_NOT_GENERATED)
+		num_cmd = _mission.num_commands();
 }
 
 void VirtualWP::restore_mission()
@@ -396,10 +415,10 @@ void VirtualWP::restore_mission()
 		// Here I restore the original version of the mission (in case it should be reloaded)
 		// GCS_SEND_MSG("Restoring original mission");
 		AP_Mission::Mission_Command wp;
-		uint16_t num_commands = _mission.num_commands();
+
 		// GCS_SEND_MSG("Number of commands: %d",num_commands);
 		// The variable wp will contain the landinig waypoint that I need to restore
-		_mission.get_next_nav_cmd(num_commands-1, wp);
+		_mission.get_next_nav_cmd(num_cmd-1, wp);
 		uint16_t landing_wp_index = wp.index;
 		// GCS_SEND_MSG("Landing WP index: %d",landing_wp_index);
 
@@ -418,6 +437,8 @@ void VirtualWP::restore_mission()
 
 		vwp_status = VWP_REMOVED;
 
+		update_num_commands();
+
     }
 }
 
@@ -428,6 +449,4 @@ bool VirtualWP::is_current_cmd_vwp(const AP_Mission::Mission_Command& cmd)
 
 	return false;
 }
-
-
 

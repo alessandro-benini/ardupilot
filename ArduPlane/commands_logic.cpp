@@ -1,11 +1,5 @@
 #include "Plane.h"
 
-#ifndef TEST_WINGBOYS
-#define GCS_SEND_MSG(f_, ...) gcs_send_text_fmt(PSTR(f_),##__VA_ARGS__)
-#else
-#define GCS_SEND_MSG(f_, ...) gcs_send_text_fmt(MAV_SEVERITY_INFO,(f_),##__VA_ARGS__)
-#endif
-
 /********************************************************************************/
 // Command Event Handlers
 /********************************************************************************/
@@ -359,6 +353,27 @@ void Plane::do_RTL(int32_t rtl_altitude)
 
 void Plane::do_takeoff(const AP_Mission::Mission_Command& cmd)
 {
+    // ========================================================================================
+	// Initialize the virtual waypoint procedure
+    virtual_wp.init_VWP();
+
+    GCS_SEND_MSG("Num commands: %d",virtual_wp.get_num_commands());
+	GCS_SEND_MSG("Idx Land WP: %d",virtual_wp.get_idx_landing_wp());
+	GCS_SEND_MSG("Idx Last MWP: %d",virtual_wp.get_idx_last_mission_wp());
+	GCS_SEND_MSG("Idx VWP: %d",virtual_wp.get_idx_vwp());
+
+	// Currently, if the index calculation fails, we do nothing.
+	// We could think about aborting the mission in some particular circumstances.
+    if(virtual_wp.vwp_error == VWP_NO_ERROR)
+    {
+    	GCS_SEND_MSG("Index calculated correctly.");
+    }
+    else
+    {
+    	GCS_SEND_MSG("Error during index generation: %d",virtual_wp.vwp_error);
+    }
+    // ========================================================================================
+
     prev_WP_loc = current_loc;
     set_next_WP(cmd.content.location);
     // pitch in deg, airspeed  m/s, throttle %, track WP 1 or 0
@@ -380,23 +395,6 @@ void Plane::do_takeoff(const AP_Mission::Mission_Command& cmd)
     steer_state.hold_course_cd = -1;
     auto_state.baro_takeoff_alt = barometer.get_altitude();
 
-    // -----------------------------------------------------------------------
-    // Initialize the virtual waypoint procedure
-    virtual_wp.init_VWP();
-
-    if(virtual_wp.vwp_error == VWP_NO_ERROR)
-    {
-    	GCS_SEND_MSG("Index calculated correctly.");
-    	GCS_SEND_MSG("Idx Land WP: %d",virtual_wp.get_idx_landing_wp());
-    	GCS_SEND_MSG("Idx Last MWP: %d",virtual_wp.get_idx_last_mission_wp());
-    	GCS_SEND_MSG("Idx VWP: %d",virtual_wp.get_idx_vwp());
-    }
-    else
-    {
-    	GCS_SEND_MSG("Error during index generation: %d",virtual_wp.vwp_error);
-    }
-    // -----------------------------------------------------------------------
-
 }
 
 void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
@@ -404,23 +402,25 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
 	// First I set the current waypoint, so the mission keeps going
     set_next_WP(cmd.content.location);
 
-    // -----------------------------------------------------------------------
-
+    // ========================================================================================
     // Check if it's time to generate the virtual waypoints
     virtual_wp.generate_virtual_waypoints(cmd);
 
     if(virtual_wp.vwp_status == VWP_GENERATED)
+    {
         GCS_SEND_MSG("Virtual WP generated");
-
+        GCS_SEND_MSG("Num commands: %d",virtual_wp.get_num_commands());
+    }
+    // -----------------------------------------------------------------------
     // Log information on the SD card
     float cmd_lat = cmd.content.location.lat*TO_DEG_FORMAT;
     float cmd_lng = cmd.content.location.lng*TO_DEG_FORMAT;
     float cmd_alt = cmd.content.location.alt/100.0f;
-    float cmd_idx = cmd.index;
+    int16_t cmd_idx = cmd.index;
 
     if(virtual_wp.is_current_cmd_vwp(cmd))
     {
-    	GCS_SEND_MSG("Virtual_WP(%d),%d,%10.6f,%10.6f,%8.3f",cmd_idx,cmd_idx,cmd_lat,cmd_lng,cmd_alt);
+    	GCS_SEND_MSG("VWP(%d),%d,%10.6f,%10.6f,%8.3f",cmd_idx,cmd_idx,cmd_lat,cmd_lng,cmd_alt);
     	Log_Write_VWP(cmd_idx,cmd_lat,cmd_lng,cmd_alt,1);
     }
     else
@@ -428,7 +428,7 @@ void Plane::do_nav_wp(const AP_Mission::Mission_Command& cmd)
     	GCS_SEND_MSG("WP(%d),%d,%10.6f,%10.6f,%8.3f",cmd_idx,cmd_idx,cmd_lat,cmd_lng,cmd_alt);
 		Log_Write_VWP(cmd_idx,cmd_lat,cmd_lng,cmd_alt,0);
     }
-    // -----------------------------------------------------------------------
+    // ========================================================================================
 
 }
 
@@ -471,14 +471,17 @@ void Plane::do_land(const AP_Mission::Mission_Command& cmd)
     }
 #endif
 
-    // -----------------------------------------------------------------------
+    // ========================================================================================
+    // After issuing the landing cmd the mission is restored to its original state
     virtual_wp.restore_mission();
     if(virtual_wp.vwp_status == VWP_REMOVED)
+    {
         GCS_SEND_MSG("Original mission restored");
+        GCS_SEND_MSG("Num commands: %d",virtual_wp.get_num_commands());
+    }
     else
         GCS_SEND_MSG("Error while restoring original mission");
-
-    // -----------------------------------------------------------------------
+    // ========================================================================================
 
 }
 

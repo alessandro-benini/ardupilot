@@ -71,6 +71,7 @@ public:
 
     bool is_change_speed_cmd_issued(const AP_Mission::Mission_Command& cmd);
     void generate_virtual_waypoints(const AP_Mission::Mission_Command& cmd);
+    void update_num_commands();
     bool is_current_cmd_vwp(const AP_Mission::Mission_Command& cmd);
     void restore_mission();
 
@@ -83,6 +84,8 @@ public:
     int16_t 	get_idx_last_mission_wp()	{ return idx_last_mission_wp; }
     int16_t 	get_idx_landing_wp()		{ return idx_landing_wp; }
     int16_t 	get_idx_vwp()				{ return idx_vwp; }
+
+    int16_t		get_num_commands()			{ return num_cmd; }
 
     vwp_status_t vwp_status;
     vwp_error_status_t vwp_error;
@@ -115,9 +118,6 @@ private:
 
     // Number of commands contained in the original mission
     int16_t num_cmd;
-
-    // Command item used for iterating through the mission
-    AP_Mission::Mission_Command current_cmd;
 
     AP_Mission		&_mission;
     AP_AHRS_NavEKF	&_ahrs;

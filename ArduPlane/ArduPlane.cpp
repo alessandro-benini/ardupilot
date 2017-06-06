@@ -24,6 +24,7 @@
 
 #define SCHED_TASK(func, rate_hz, max_time_micros) SCHED_TASK_CLASS(Plane, &plane, func, rate_hz, max_time_micros)
 
+bool vwp_status_printed = false;
 
 /*
   scheduler table - all regular tasks are listed here, along with how
@@ -375,6 +376,17 @@ void Plane::one_second_loop()
     // indicates that the sensor or subsystem is present but not
     // functioning correctly
     update_sensor_status_flags();
+
+    if(!vwp_status_printed)
+    {
+        if(virtual_wp.is_vwp_enabled())
+        	GCS_SEND_MSG("VWP enabled");
+        else
+        	GCS_SEND_MSG("VWP disabled");
+
+        vwp_status_printed = true;
+    }
+
 }
 
 void Plane::log_perf_info()

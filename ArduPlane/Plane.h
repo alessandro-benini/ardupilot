@@ -121,6 +121,12 @@
 #include <AP_VirtualWP/AP_VirtualWP.h>
 #endif
 
+#ifndef TEST_WINGBOYS
+#define GCS_SEND_MSG(f_, ...) gcs_send_text_fmt(PSTR(f_),##__VA_ARGS__)
+#else
+#define GCS_SEND_MSG(f_, ...) gcs_send_text_fmt(MAV_SEVERITY_INFO,(f_),##__VA_ARGS__)
+#endif
+
 /*
   a plane specific AP_AdvancedFailsafe class
  */
