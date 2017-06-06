@@ -110,10 +110,15 @@
 #include "avoidance_adsb.h"
 #include "AP_Arming.h"
 
-// #define LOG_GCS_MESSAGES_ONLY
-
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
 #include <SITL/SITL.h>
+#endif
+
+#define MSG_WINGBOYS
+#define TEST_WINGBOYS
+
+#ifdef MSG_WINGBOYS
+#include <AP_VirtualWP/AP_VirtualWP.h>
 #endif
 
 /*
@@ -787,54 +792,10 @@ private:
     AP_Tuning_Plane tuning;
 
     static const struct LogStructure log_structure[];
-    
-    // -------------------------------------------------------------------------------
-    // BEGIN of virtual waypoint section
 
-    // Index of the item after which calculate the virtual waypoints
-    int16_t vwp_cmd_idx;
-
-    int16_t idx_last_mission_wp;
-    int16_t idx_landing_wp;
-
-    typedef enum vwp_generation_states {
-        VWP_NOT_GENERATED = 0,
-        VWP_GENERATED,
-		VWP_REMOVED
-    } vwp_status_t;
-
-    typedef enum vwp_error_states {
-        VWP_NO_ERROR = 0,
-		VWP_LANDING_WP_NOT_FOUND,
-		VWP_LAST_MISSION_WP_NOT_FOUND,
-		VWP_INDEX_NOT_FOUND
-    } vwp_error_status_t;
-
-    typedef struct {
-      // The following variable set the point in the mission where the virtual waypoints are generated
-      int16_t dist_lwp_idx;
-      // Number of virtual waypoints
-      int16_t num_vwp;
-    } vwp_config_t;
-
-    // Virtual waypoint functions
-    void init_VWP(void);
-    void calc_index_landing_waypoint(void);
-    void calc_index_last_mission_waypoint(void);
-    void calc_index_virtual_waypoints();
-    void generate_virtual_waypoints(const AP_Mission::Mission_Command& cmd);
-    void restore_mission();
-
-    vwp_status_t vwp_status = VWP_NOT_GENERATED;
-    vwp_error_status_t vwp_error = VWP_NO_ERROR;
-
-    vwp_config_t vwp_cfg = {
-      .dist_lwp_idx = 2,
-      .num_vwp = 4
-    };
-
-    // END of virtual waypoint section
-    // -------------------------------------------------------------------------------
+#ifdef MSG_WINGBOYS
+    VirtualWP virtual_wp{mission,ahrs};
+#endif
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
     // the crc of the last created PX4Mixer

@@ -13,61 +13,6 @@
 
 const AP_Param::Info Plane::var_info[] = {
 
-	// @Param: VWP_ENABLE
-	// @DisplayName: Enabling virtual waypoint feature
-	// @Description: This parameter allows to enable/disable the virtual waypoint feature. By default this feature is disabled.
-	// @User: Advanced
-	// @Units: Boolean
-	// @Range: 0 1
-	// @Increment: 1
-	GSCALAR(vwp_enabled,            "VWP_ENABLE",     VWP_ENABLE_DEFAULT),
-
-    // @Param: HEADING_WIND
-    // @DisplayName: Heading with respect to the wind direction
-    // @Description: Heading with respect to the wind direction
-    // @User: Advanced
-    // @Units: Degrees
-    // @Range: 0 180
-    // @Increment: 1
-    GSCALAR(heading_wind,            "VWP_HEADING_WIND",     VWP_HEADING_WIND_DEFAULT),
-
-    // @Param: VWP SPEED
-    // @DisplayName: Virtual Waypoint Speed
-    // @Description: Ths parameter allows to set the airspeed of the UAV during the navigation through the virtual waypoints.
-    // @User: Advanced
-    // @Units: m/s
-    // @Range: 15 30
-    // @Increment: 1
-    GSCALAR(vwp_spd,            "VWP_SPD",     VWP_SPD_DEFAULT),
-
-
-    // @Param: DIST_VWP1
-    // @DisplayName: Distance of VWP1 from landing WP
-    // @Description: Desc - Distance of VWP1 from landing WP
-    // @User: Advanced
-    // @Units: m
-    // @Range: 20 500
-    // @Increment: 1
-    GSCALAR(dist_vwpl_1,            "VWP_DIST_L_1",     VWP_DIST_WP1_DEFAULT),
-
-    // @Param: DIST_INCR
-    // @DisplayName: Distance of VWP2 from landing WP
-    // @Description: Desc - Distance of VWP2 from landing VWP1
-    // @User: Advanced
-    // @Units: m
-    // @Range: 20 500
-    // @Increment: 1
-    GSCALAR(dist_vwp1_2,            "VWP_DIST_1_2",     VWP_DIST_1_2_DEFAULT),
-
-    // @Param: DIST_INCR
-    // @DisplayName: Distance of VWP2 from landing WP
-    // @Description: Desc - Distance of VWP2 from landing VWP1
-    // @User: Advanced
-    // @Units: m
-    // @Range: 20 500
-    // @Increment: 1
-    GSCALAR(dist_vwp2_3,            "VWP_DIST_2_3",     VWP_DIST_2_3_DEFAULT),
-
     // @Param: FORMAT_VERSION
     // @DisplayName: Eeprom format version number
     // @Description: This value is incremented when changes are made to the eeprom format

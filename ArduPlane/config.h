@@ -409,28 +409,4 @@
 # define HAVE_PX4_MIXER 0
 #endif
 
-#ifndef VWP_ENABLE_DEFAULT
-#define VWP_ENABLE_DEFAULT 0
-#endif
-
-#ifndef VWP_HEADING_WIND_DEFAULT
-#define VWP_HEADING_WIND_DEFAULT 180.0f
-#endif
-
-#ifndef VWP_SPD_DEFAULT
-#define VWP_SPD_DEFAULT 20.0f
-#endif
-
-#ifndef VWP_DIST_WP1_DEFAULT
-#define VWP_DIST_WP1_DEFAULT 50.0f
-#endif
-
-#ifndef VWP_DIST_1_2_DEFAULT
-#define VWP_DIST_1_2_DEFAULT 50.0f
-#endif
-
-#ifndef VWP_DIST_2_3_DEFAULT
-#define VWP_DIST_2_3_DEFAULT 50.0f
-#endif
-
 
